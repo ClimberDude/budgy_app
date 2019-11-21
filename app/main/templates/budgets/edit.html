@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+
+    <h1>Edit Budget Category</h1>
+
+    <h3>Select a Category to Edit</h3>
+    <br>
+    <form class="form form-horizontal" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        <table class="w3-table-all">
+            <tbody>
+                <tr>
+                    <th style="width:15%">Select</th>
+                    <th style="width:35%">Budget</th>
+                    <th style="width:25%">Annual Budget</th>
+                    <th style="width:25%">Current Balance</th>
+                </tr>
+                {% for option in form.select_budget %}
+                <tr>
+                    <td>{{ option }}</td>
+                    {% for category in budget_categories if category.id == option.data%}
+                    <td>{{ category.category_title }}</td>
+                        {% for history in category.budget_history if history.status == 'C' %}
+                    <td>{{ "$%.2f"|format(history.annual_budget) }}</td>
+                    <td>{{ "$%.2f"|format(category.current_balance) }}</td>
+                        {% endfor %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table >
+        <br>
+        <h3>Enter Data to be Changed</h3>
+        <br>
+        <table class="w3-table-all">
+            <tbody>
+                <tr>
+                    <th style="width:30%">{{ form.category_title.label }}</th>
+                    <th style="width:20%">{{ form.target_period.label }}</th>
+                    <th style="width:30%">{{ form.target_value.label }}</th>
+                    <th style="width:20%">{{ form.current_balance.label }}</th>
+                </tr>
+                <tr>
+                    <td>{{ form.category_title }}</td>
+                    <td>{{ form.target_period }}</td>
+                    <td>{{ form.target_value }}</td>
+                    <td>{{ form.current_balance }}</td>
+                </tr>
+                <tr>
+                    <td><br> </td>
+                </tr>
+                <tr>
+                    <td>{{ form.submit }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+
+{% endblock %}

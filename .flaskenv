@@ -1,0 +1,2 @@
+FLASK_APP=budgy.py
+FLASK_DEBUG=1
