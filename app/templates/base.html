@@ -17,8 +17,23 @@
                 <a class="navbar-brand" href="{{ url_for('main.landing') }}">Budgy</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav mr-auto">
                     <li><a href="{{ url_for('main.landing') }}">{{ 'Home' }}</a></li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a id="dropdown03" class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Budgets
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown03">
+                            <li class="dropdown-item"><a href="{{ url_for('main.budget_add') }}">Add New Budgets</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.budget_edit') }}">Edit Budgets</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.budget_delete') }}">Delete Budgets</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#">Transactions</a></li>
+                    <li><a href="#">Visualizations</a></li>
+                    {% endif %}
+
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}

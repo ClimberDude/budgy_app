@@ -1,6 +1,6 @@
 from app import db
 from app.main import bp
-from app.main.forms import InputBudgetForm, EditBudgetForm
+from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm
 
 from app.models import Budget_Category, Budget_History, Transaction
 
@@ -12,12 +12,13 @@ from flask_login import current_user, login_required
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/landing', methods=['GET', 'POST'])
 def landing():
-    return render_template('landing.html',title='Landing Page')
+    return render_template('landing.html',
+                            title='Landing Page')
 
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
-    form=InputBudgetForm()
+    form=AddBudgetForm()
     if form.validate_on_submit():
         budget_category= Budget_Category(id_user = current_user.id,
                                          category_title = form.category_title.data,
@@ -52,7 +53,6 @@ def budget_add():
 @bp.route('/budget/edit', methods=['GET', 'POST'])
 @login_required
 def budget_edit():
-
     #Populate the list of radio button choices with the current list of
     #budget categories
     radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
@@ -125,12 +125,58 @@ def budget_edit():
                 db.session.add(current_history)
 
                 flash("Your annual budget target has been changed.")
-
+        #push all changes through to the database
         db.session.commit()
 
-        # flash('Changes successful!')
+        #reload the edit page for further edits
         return redirect(url_for('main.budget_edit'))
 
     return render_template('budgets/edit.html',
+                            title='edit_budget',
                            form=form,
                            budget_categories=budget_categories)
+
+@bp.route('/budget/delete', methods=['GET','POST'])
+@login_required
+def budget_delete():
+
+    #Populate the list of radio button choices with the current list of
+    #budget categories
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+
+    #Pull all the current data for the categories for the current user, to display
+    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+
+    #Instantiate the form
+    form = DeleteBudgetForm()
+
+    #Pass dynamic radio button data to the form
+    form.select_budget.choices = radio_choices
+
+    if form.validate_on_submit():
+        #Identify the category to be edited by pulling the data from the radio selection
+        category = current_user.budget_categories.filter_by(id=form.select_budget.data).first()
+
+        #Pull the user selection of whether to delete or end the category
+        delete_or_end=form.delete_or_end_budget.data
+
+        if delete_or_end == 1:
+            #Delete budget category
+            # TODO: remove any applicable budget history table entries along with the 
+            #   budget category data. Look into adding cascading delete to the relationship in db model.
+            db.session.delete(category)
+            db.session.commit()
+
+            flash('The category has been deleted.')
+            return redirect(url_for('main.budget_delete'))
+        elif delete_or_end == 2:
+            # TODO: implement the end functionality once the database table has been updated to accept 
+            #   a status character.
+
+            flash("Ending a category is not yet implemented.")
+            return redirect(url_for('main.budget_delete'))
+
+    return render_template('budgets/delete.html',
+                            title='Delete/End Budget',
+                            form=form,
+                            budget_categories=budget_categories)
