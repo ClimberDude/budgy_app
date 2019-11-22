@@ -34,7 +34,8 @@ class DeleteBudgetForm(FlaskForm):
     submit = SubmitField("Delete or End Category")
 
 #Forms for manipulating Transaction objects
-class InputTransactionForm(FlaskForm):
+class AddTransactionForm(FlaskForm):
+    trans_type = RadioField('Type of Transaction', choices=[(1,'Debit'),(2,'Credit'),(3,'Transfer')] validators=[DataRequired()])
 
     submit = SubmitField("Submit Transaction")
 

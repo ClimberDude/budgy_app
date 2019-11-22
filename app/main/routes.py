@@ -1,6 +1,7 @@
 from app import db
 from app.main import bp
-from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm
+from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm \
+                            AddTransactionForm, EditTransactionForm, DeleteTransactionForm
 
 from app.models import Budget_Category, Budget_History, Transaction
 
