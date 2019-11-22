@@ -10,17 +10,19 @@
     <form class="form form-horizontal" method="post" role="form">
         {{ form.hidden_tag() }}
         {{ wtf.form_errors(form, hiddens="only") }}
-        <table class="w3-table-all">
-            <tbody>
+        <table class="table table-hover">
+            <thead>
                 <tr>
-                    <th style="width:15%">Select</th>
-                    <th style="width:35%">Budget</th>
-                    <th style="width:25%">Annual Budget</th>
-                    <th style="width:25%">Current Balance</th>
+                    <th>Select</th>
+                    <th class="col-md-4">Category Title</th>
+                    <th class="col-md-4">Annual Budget</th>
+                    <th class="col-md-4">Current Balance</th>
                 </tr>
+            </thead>
+            <tbody>  
                 {% for option in form.select_budget %}
                 <tr>
-                    <td>{{ option }}</td>
+                    <th scope='row'>{{ option }}</td>
                     {% for category in budget_categories if category.id == option.data%}
                     <td>{{ category.category_title }}</td>
                         {% for history in category.budget_history if history.status == 'C' %}
@@ -35,13 +37,13 @@
         <br>
         <h3>Enter Data to be Changed</h3>
         <br>
-        <table class="w3-table-all">
+        <table class="table table-hover">
             <tbody>
                 <tr>
-                    <th style="width:30%">{{ form.category_title.label }}</th>
-                    <th style="width:20%">{{ form.target_period.label }}</th>
-                    <th style="width:30%">{{ form.target_value.label }}</th>
-                    <th style="width:20%">{{ form.current_balance.label }}</th>
+                    <th scope="col-md-3">{{ form.category_title.label }}</th>
+                    <th class="col-md-3">{{ form.target_period.label }}</th>
+                    <th class="col-md-3">{{ form.target_value.label }}</th>
+                    <th class="col-md-3">{{ form.current_balance.label }}</th>
                 </tr>
                 <tr>
                     <td>{{ form.category_title }}</td>
@@ -49,14 +51,13 @@
                     <td>{{ form.target_value }}</td>
                     <td>{{ form.current_balance }}</td>
                 </tr>
-                <tr>
-                    <td><br> </td>
-                </tr>
-                <tr>
-                    <td>{{ form.submit }}</td>
-                </tr>
             </tbody>
         </table>
+        <div>
+            <p>
+                {{ form.submit }}
+            </p>
+        </div>
     </form>
 
 {% endblock %}

@@ -53,6 +53,8 @@ class Budget_Category(db.Model):
     category_title = db.Column(db.String(64), index=True)
     current_balance = db.Column(db.DECIMAL)
     budget_history = db.relationship('Budget_History',backref='budget_category',lazy='dynamic')
+    # TODO: add an active or ended column to the database to keep track of categories that have 
+    #   been ended by the user.
 
     def __repr__(self):
         return '<Budget Category {}>'.format(self.category_title)
