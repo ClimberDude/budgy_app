@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+
+    <h1>Edit Transactions</h1>
+    <h3>Select a Transaction to Edit</h3>
+    <br>
+    <form class="form form-horizontal" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th class="col-md-2">Date</th>
+                    <th class="col-md-1">Amount</th>
+                    <th class="col-md-1">Type</th>
+                    <th class="col-md-2">Budget Category</th>
+                    <th class="col-md-1">Vendor</th>
+                    <th class="col-md-4">Note</th>
+                </tr>
+            </thead>
+            <tbody>  
+                {% for option in form.select_trans %}
+                <tr>
+                    <th scope='row'>{{ option }}</td>
+                    {% for trans in transactions if trans.id == option.data %}
+                    <td>{{ moment(trans.date).format('ll') }}</td>
+                    <td>{{ "$%.2f"|format(trans.amount) }}</td>
+                    {% if trans.ttype == 'E' %}
+                    <td>Expense</td>
+                    {% elif trans.ttype == 'I' %}
+                    <td>Income</td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    <td>{{ trans.budget_category.category_title }}</td>
+                    <td>{{ trans.vendor }}</td>
+                    <td>{{ trans.note }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table >
+        <br>
+        <h3>Enter Data to be Changed</h3>
+        <br>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col-md-1">{{ form.trans_date.label }}</th>
+                    <th class="col-md-1">{{ form.trans_amount.label }}</th>
+                    <th class="col-md-1">{{ form.trans_type.label }}</th>
+                    <th class="col-md-1">{{ form.trans_category.label }}</th>
+                    <th class="col-md-1">{{ form.trans_vendor.label }}</th>
+                    <th class="col-md-1">{{ form.trans_note.label }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ form.trans_date }}</td>
+                    <td>{{ form.trans_amount }}</td>
+                    <td>{{ form.trans_type }}</td>
+                    <td>{{ form.trans_category }}</td>
+                    <td>{{ form.trans_vendor }}</td>
+                    <td>{{ form.trans_note }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <p>
+                {{ form.submit }}
+            </p>
+        </div>
+    </form>
+
+{% endblock %}
