@@ -1,6 +1,6 @@
 from app import db
 from app.main import bp
-from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm \
+from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm, \
                             AddTransactionForm, EditTransactionForm, DeleteTransactionForm
 
 from app.models import Budget_Category, Budget_History, Transaction
@@ -16,10 +16,14 @@ def landing():
     return render_template('landing.html',
                             title='Landing Page')
 
+#route functions related to handling the budget categories
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
+    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+
     form=AddBudgetForm()
+
     if form.validate_on_submit():
         budget_category= Budget_Category(id_user = current_user.id,
                                          category_title = form.category_title.data,
@@ -47,9 +51,10 @@ def budget_add():
         flash('Category {} has been added.'.format(budget_category.category_title))
         return redirect(url_for('main.budget_add'))
 
-    return render_template('budgets/input.html',
+    return render_template('budgets/add.html',
                            title='Add Budget',
-                           form=form)
+                           form=form,
+                           budget_categories=budget_categories)
 
 @bp.route('/budget/edit', methods=['GET', 'POST'])
 @login_required
@@ -181,3 +186,195 @@ def budget_delete():
                             title='Delete/End Budget',
                             form=form,
                             budget_categories=budget_categories)
+
+@bp.route('/budget/view', methods=['GET','POST'])
+@login_required
+def budget_view():
+    page = request.args.get('page',1,type=int)
+    budgets = current_user.budget_categories.order_by(Budget_Category.category_title.asc()).paginate(page,
+        10, False)
+
+    next_url = url_for('main.budget_view', page=budgets.next_num) \
+        if budgets.has_next else None
+    prev_url = url_for('main.budget_view', page=budgets.prev_num) \
+        if budgets.has_prev else None
+
+    return render_template('budgets/view.html',
+                            title='View Budgets',
+                            budgets=budgets.items,
+                            next_url=next_url,
+                            prev_url=prev_url
+                            )
+
+#route functions related to handling transactions
+@bp.route('/trans/add', methods=['GET','POST'])
+@login_required
+def trans_add():
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+
+    form = AddTransactionForm()
+
+    form.trans_category.choices += budget_choices
+
+    if form.validate_on_submit():
+
+        if form.trans_category.data == 0:
+            flash('Please select a valid category')
+            return redirect(url_for('main.trans_add'))
+
+        transaction = Transaction(id_user = current_user.id,
+                                    id_budget_category = form.trans_category.data,
+                                    date = form.trans_date.data,
+                                    amount = form.trans_amount.data,
+                                    vendor = form.trans_vendor.data,
+                                    note = form.trans_note.data,
+                                    ttype = form.trans_type.data)
+        
+        db.session.add(transaction)
+        db.session.commit()
+
+        transaction.apply_transaction()
+
+        flash("Your transaction has been added.")
+        return redirect(url_for('main.trans_add'))
+
+    return render_template('transactions/add.html',
+                            title='Add Transactions',
+                            form=form,
+                            budget_categories=budget_categories,
+                            )
+
+@bp.route('/trans/edit', methods=['GET','POST'])
+@login_required
+def trans_edit():
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
+    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+
+    form = EditTransactionForm() 
+    form.select_trans.choices = trans_choices
+    form.trans_category.choices += budget_choices
+
+    if form.validate_on_submit():
+        transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
+        flash_note = []
+
+        # TODO: figure out how to handle user and server date issues. How to get user timezone?
+        if form.trans_date.data:
+            if form.trans_date.data == transaction.date:
+                flash("The new date you've entered matches the existing date.")
+            else:
+                transaction.date = form.trans_date.data
+                db.session.commit()
+                flash_note += [0]
+
+        if form.trans_amount.data:
+            if form.trans_amount.data == transaction.amount:
+                flash("The new amount you've entered matches the existing amount.")
+            else:
+                transaction.change_trans_amount(form.trans_amount.data)
+                flash_note += [1]
+
+        if form.trans_type.data != 'S':
+            if form.trans_type.data == transaction.ttype:
+                flash("The new type you've entered matches the existing type.")
+            else:
+                transaction.flip_trans_type()
+                flash_note += [2]
+
+        if form.trans_category.data != 0:
+            if form.trans_category.data == transaction.id_budget_category:
+                flash("The new category you've entered matches the existing category.")
+            else:
+                transaction.change_trans_category(form.trans_category.data)
+                flash_note += [3]
+
+        if form.trans_vendor.data:
+            if form.trans_vendor.data == transaction.vendor:
+                flash("The new vendor you've entered matches the existing vendor.")
+            else:
+                transaction.vendor = form.trans_vendor.data
+                db.session.commit()
+                flash_note += [4]
+
+        if form.trans_note.data:
+            if form.trans_note.data == transaction.note:
+                flash("The new note you've entered matches the existing note.")
+            else:
+                transaction.note = form.trans_note.data
+                db.session.commit()
+                flash_note += [5]
+
+        db.session.commit()
+
+        if 0 in flash_note:
+            flash("The transaction date has been changed.")
+        if 1 in flash_note:
+            flash("The transaction amount has been changed.")
+        if 2 in flash_note:
+            flash("The transaction type has been changed.")
+        if 3 in flash_note:
+            flash("The transaction budget category has been changed.")
+        if 4 in flash_note:
+            flash("The transaction vendor has been changed.")
+        if 5 in flash_note:
+            flash("The transaction note has been changed.")
+
+        return redirect(url_for('main.trans_edit'))
+
+
+    return render_template('transactions/edit.html',
+                        title='Edit Transactions',
+                        form=form,
+                        transactions=transactions
+                        )
+
+
+@bp.route('/trans/delete', methods=['GET','POST'])
+@login_required
+def trans_delete():
+    page = request.args.get('page',1,type=int)
+
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
+    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+
+    form = DeleteTransactionForm()
+
+    form.select_trans.choices = trans_choices
+    
+    if form.validate_on_submit():
+
+        transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
+        transaction.unapply_transaction()
+
+        db.session.delete(transaction)
+        db.session.commit()
+
+        flash("The transaction you've selected has been deleted.")
+        return redirect(url_for("main.trans_delete"))
+
+    return render_template('transactions/delete.html',
+                    title='Delete Transactions',
+                    form=form,
+                    transactions=transactions
+                    )
+
+@bp.route('/trans/view"', methods=['GET','POST'])
+@login_required
+def trans_view():
+    page = request.args.get('page',1,type=int)
+
+    transactions = current_user.transactions.order_by(Transaction.date.desc()).paginate(page,
+        10, False)
+    next_url = url_for('main.trans_view', page=transactions.next_num) \
+        if transactions.has_next else None
+    prev_url = url_for('main.trans_view', page=transactions.prev_num) \
+        if transactions.has_prev else None
+
+    return render_template('transactions/view.html',
+                            title='View Transactions',
+                            transactions=transactions.items,
+                            next_url=next_url,
+                            prev_url=prev_url
+                            )

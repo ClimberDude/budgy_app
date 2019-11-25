@@ -13,7 +13,7 @@ import os
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 mail = Mail()
-migrate = Migrate()
+migrate = Migrate(compare_type=True)
 moment = Moment()
 login = LoginManager()
 login.login_view = 'admin.login'
@@ -26,7 +26,7 @@ def create_app(config_class=Config):
     bootstrap.init_app(app)
     db.init_app(app)
     mail.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, compare_type=True)
     moment.init_app(app)
     login.init_app(app)
 
