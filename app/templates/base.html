@@ -21,20 +21,41 @@
                     <li><a href="{{ url_for('main.landing') }}">{{ 'Home' }}</a></li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a id="dropdown03" class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a id="dropdown01" class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Budgets
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown03">
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_add') }}">Add New Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_edit') }}">Edit Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_delete') }}">Delete Budgets</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.budget_view') }}">View Budgets</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">Transactions</a></li>
-                    <li><a href="#">Visualizations</a></li>
+
+                    <li class="nav-item dropdown">
+                        <a id="dropdown02" class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Transactions
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown02">
+                            <li class="dropdown-item"><a href="{{ url_for('main.trans_add') }}">Add Transactions</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.trans_edit') }}">Edit Transactions</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.trans_delete') }}">Delete Transactions</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.trans_view') }}">View Transactions</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Visualizations
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown02">
+                                <li class="dropdown-item"><a href="#">Plots & Charts</a></li>
+                        </ul>    
+                    </li>
                     {% endif %}
 
                 </ul>
+
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}
                     <li><a href="{{ url_for('admin.login') }}">{{ 'Login' }}</a></li>

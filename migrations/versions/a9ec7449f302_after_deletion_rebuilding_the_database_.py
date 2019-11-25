@@ -1,8 +1,8 @@
-"""users, budget_category, budget_history, transaction
+"""After deletion, rebuilding the database, user table, budget category table, budget history table, and transaction tables
 
-Revision ID: 2518578d682e
+Revision ID: a9ec7449f302
 Revises: 
-Create Date: 2019-11-19 17:15:31.527123
+Create Date: 2019-11-22 18:27:35.625070
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2518578d682e'
+revision = 'a9ec7449f302'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -50,7 +50,7 @@ def upgrade():
     )
     op.create_index(op.f('ix_budget_history_status'), 'budget_history', ['status'], unique=False)
     op.create_table('transaction',
-    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_user', sa.Integer(), nullable=True),
     sa.Column('id_budget_category', sa.Integer(), nullable=True),
     sa.Column('date', sa.Date(), nullable=True),

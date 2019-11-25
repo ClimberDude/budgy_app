@@ -1,0 +1,21 @@
+<div class="col-md-8">
+    <h4>Current Budget Data</h4>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="col-md-4">Date</th>
+                <th class="col-md-4">Amount</th>
+                <th class="col-md-4">Category</th>
+
+            </tr>
+        </thead>
+        <tbody>  
+            {% for trans in transactions %}
+            <tr>
+                <td>{{ trans.date }}</td>
+                <td>{{ "$%.2f"|format(trans.amount) }}</td>
+                <td>{{ trans.budget_category }}</td>
+            </tr>    
+        </tbody>
+    </table >
+</div>
