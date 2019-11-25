@@ -1,0 +1,9 @@
+<tbody>  
+        <tr>
+            <td>{{ budget.category_title }}</td>
+            {% for history in budget.budget_history if history.status == 'C' %}
+            <td>{{ "$%.2f"|format(history.annual_budget) }}</td>
+            {% endfor %}
+            <td>{{ "$%.2f"|format(budget.current_balance) }}</td>
+        </tr>
+    </tbody>

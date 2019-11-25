@@ -53,6 +53,8 @@ class Budget_Category(db.Model):
     category_title = db.Column(db.String(64), index=True)
     current_balance = db.Column(db.DECIMAL)
     budget_history = db.relationship('Budget_History',backref='budget_category',lazy='dynamic')
+    status = db.Column(db.CHAR,index=True,default="A")
+    transactions = db.relationship('Transaction',backref='budget_category',lazy='dynamic')
 
     def __repr__(self):
         return '<Budget Category {}>'.format(self.category_title)
@@ -73,16 +75,55 @@ class Budget_History(db.Model):
 
 class Transaction(db.Model):
     __tablename__ = 'transaction'
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_budget_category = db.Column(db.Integer, db.ForeignKey('budget_category.id'))
     date = db.Column(db.Date, index=True, default=datetime.utcnow().date())
-    amount = db.Column(db.DECIMAL)
+    amount = db.Column(db.DECIMAL, index=True)
     vendor = db.Column(db.String(140))
     note = db.Column(db.String(140))
+    ttype = db.Column(db.CHAR,index=True)
 
     def __repr__(self):
         return '<Transaction at {}: ${}>'.format(self.vendor, self.amount)
+
+    def apply_transaction(self):
+        if self.ttype == 'E':
+            self.budget_category.current_balance -= self.amount
+            db.session.commit()
+        elif self.ttype == 'I':
+            self.budget_category.current_balance += self.amount
+            db.session.commit()
+
+    def unapply_transaction(self):
+        if self.ttype == 'E':
+            self.budget_category.current_balance += self.amount
+            db.session.commit()
+        elif self.ttype == 'I':
+            self.budget_category.current_balance -= self.amount
+            db.session.commit()
+
+    def change_trans_amount(self, amount):
+        self.unapply_transaction()
+        self.amount = amount
+        db.session.commit()
+        self.apply_transaction()
+
+    def flip_trans_type(self):
+        self.unapply_transaction()
+        if self.ttype == 'E':
+            self.ttype = 'I'
+        elif self.ttype == 'I':
+            self.ttype = 'E'
+        db.session.commit()
+        self.apply_transaction()
+    
+    def change_trans_category(self, id_new_category):
+        self.unapply_transaction()
+        self.id_budget_category = id_new_category
+        db.session.commit()
+        self.apply_transaction()
+
 
 @login.user_loader
 def load_user(id):
