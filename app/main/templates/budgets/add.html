@@ -3,11 +3,24 @@
 
 {% block app_content %}
 
-    <h1>Add Budget Category</h1>
-    <div class="row">
-        <div class="col-md-2">
-            {{ wtf.quick_form(form) }}
+<h2>Add Budget Category</h2>
+<form class="form form-horizontal" method="post" role="form">
+{{ form.hidden_tag() }}
+{{ wtf.form_errors(form, hiddens="only") }}
+
+<div class="row">
+    <div class="col-md-4">
+        {% for item in form if item.widget.input_type!='hidden' %}
+        <div class="row">
+            <div class="col-md-5">{{ item.label }}</div>
+            <div class="col-md-3">{{ item }}</div> 
         </div>
-        {% include "_display_budget_categories.html" %}
+        <br>
+        {% endfor %}
     </div>
+    <div class="col-md-8">
+        {% include "budgets/_display_budget_categories.html" %}
+    </div>
+</div>
+</form>
 {% endblock %}

@@ -42,7 +42,7 @@ class DeleteBudgetForm(FlaskForm):
 class AddTransactionForm(FlaskForm):
     # TODO: display the date in form as local date, not UTC.
     trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
-    trans_type = RadioField('Type',validators=[DataRequired()],choices=[('E','Expense'),('I','Income')], coerce=str)
+    trans_type = SelectField('Type',validators=[DataRequired()],choices=[('E','Expense'),('I','Income')], coerce=str)
     trans_amount = DecimalField('Amount',validators=[DataRequired()])
     # TODO: figure out form validation with SelectField
     trans_category = SelectField('Budget Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
@@ -67,3 +67,9 @@ class DeleteTransactionForm(FlaskForm):
     select_trans = RadioField('Select Transaction', choices=[], validators=[DataRequired()], coerce=int)
 
     submit = SubmitField("Delete Transaction")
+
+class TransferForm(FlaskForm):
+    from_category = SelectField('From Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
+    to_category = SelectField('To Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
+    trans_amount = DecimalField('Amount',validators=[Optional()])
+    submit = SubmitField("Submit Transfer")

@@ -1,7 +1,8 @@
 from app import db
 from app.main import bp
 from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm, \
-                            AddTransactionForm, EditTransactionForm, DeleteTransactionForm
+                            AddTransactionForm, EditTransactionForm, DeleteTransactionForm, \
+                            TransferForm
 
 from app.models import Budget_Category, Budget_History, Transaction
 
@@ -20,14 +21,15 @@ def landing():
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     form=AddBudgetForm()
 
     if form.validate_on_submit():
         budget_category= Budget_Category(id_user = current_user.id,
                                          category_title = form.category_title.data,
-                                         current_balance = form.current_balance.data)
+                                         current_balance = form.current_balance.data,
+                                         status='A')
 
         db.session.add(budget_category)
         db.session.commit()
@@ -61,10 +63,10 @@ def budget_add():
 def budget_edit():
     #Populate the list of radio button choices with the current list of
     #budget categories
-    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     #Instantiate the form
     form = EditBudgetForm()
@@ -148,10 +150,10 @@ def budget_delete():
 
     #Populate the list of radio button choices with the current list of
     #budget categories
-    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     #Instantiate the form
     form = DeleteBudgetForm()
@@ -170,16 +172,21 @@ def budget_delete():
             #Delete budget category
             # TODO: remove any applicable budget history table entries along with the 
             #   budget category data. Look into adding cascading delete to the relationship in db model.
-            db.session.delete(category)
+            if category.transactions.first() != None:
+                flash("The category you are trying to delete has transactions posted against it and cannot be deleted.")
+                return redirect(url_for('main.budget_delete'))
+            else:
+                db.session.delete(category)
+                db.session.commit()
+
+                flash('The budget category has been deleted.')
+                return redirect(url_for('main.budget_delete'))
+
+        elif delete_or_end == 2:
+            category.status = 'E'
             db.session.commit()
 
-            flash('The category has been deleted.')
-            return redirect(url_for('main.budget_delete'))
-        elif delete_or_end == 2:
-            # TODO: implement the end functionality once the database table has been updated to accept 
-            #   a status character.
-
-            flash("Ending a category is not yet implemented.")
+            flash("The budget category has been ended, but historical data has been retained.")
             return redirect(url_for('main.budget_delete'))
 
     return render_template('budgets/delete.html',
@@ -191,17 +198,17 @@ def budget_delete():
 @login_required
 def budget_view():
     page = request.args.get('page',1,type=int)
-    budgets = current_user.budget_categories.order_by(Budget_Category.category_title.asc()).paginate(page,
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).paginate(page,
         10, False)
 
-    next_url = url_for('main.budget_view', page=budgets.next_num) \
-        if budgets.has_next else None
-    prev_url = url_for('main.budget_view', page=budgets.prev_num) \
-        if budgets.has_prev else None
+    next_url = url_for('main.budget_view', page=budget_categories.next_num) \
+        if budget_categories.has_next else None
+    prev_url = url_for('main.budget_view', page=budget_categories.prev_num) \
+        if budget_categories.has_prev else None
 
     return render_template('budgets/view.html',
                             title='View Budgets',
-                            budgets=budgets.items,
+                            budget_categories=budget_categories.items,
                             next_url=next_url,
                             prev_url=prev_url
                             )
@@ -210,8 +217,16 @@ def budget_view():
 @bp.route('/trans/add', methods=['GET','POST'])
 @login_required
 def trans_add():
-    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    page = request.args.get('page',1,type=int)
+
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).paginate(page,
+        10,False)
+
+    next_url = url_for('main.trans_add', page=budget_categories.next_num) \
+        if budget_categories.has_next else None
+    prev_url = url_for('main.trans_add', page=budget_categories.prev_num) \
+        if budget_categories.has_prev else None
 
     form = AddTransactionForm()
 
@@ -237,20 +252,37 @@ def trans_add():
         transaction.apply_transaction()
 
         flash("Your transaction has been added.")
-        return redirect(url_for('main.trans_add'))
+        
+        #reads the current pagination page, and redirects back to that
+        #page after submission of the form
+        next_page = request.args.get('page')
+        if not next_page:
+            next_page = None
+
+        return redirect(url_for('main.trans_add',page=next_page))
 
     return render_template('transactions/add.html',
                             title='Add Transactions',
                             form=form,
-                            budget_categories=budget_categories,
+                            budget_categories=budget_categories.items,
+                            next_url=next_url,
+                            prev_url=prev_url
                             )
 
 @bp.route('/trans/edit', methods=['GET','POST'])
 @login_required
 def trans_edit():
-    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
-    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
-    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    page = request.args.get('page',1,type=int)
+
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).paginate(page,10,False).items]
+    transactions = current_user.transactions.order_by(Transaction.date.desc()).paginate(page,10,False)
+    
+    next_url = url_for('main.trans_edit', page=transactions.next_num) \
+        if transactions.has_next else None
+    prev_url = url_for('main.trans_edit', page=transactions.prev_num) \
+        if transactions.has_prev else None
+
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     form = EditTransactionForm() 
     form.select_trans.choices = trans_choices
@@ -280,7 +312,7 @@ def trans_edit():
             if form.trans_type.data == transaction.ttype:
                 flash("The new type you've entered matches the existing type.")
             else:
-                transaction.flip_trans_type()
+                transaction.change_trans_type()
                 flash_note += [2]
 
         if form.trans_category.data != 0:
@@ -321,23 +353,37 @@ def trans_edit():
         if 5 in flash_note:
             flash("The transaction note has been changed.")
 
-        return redirect(url_for('main.trans_edit'))
+        #reads the current pagination page, and redirects back to that
+        #page after submission of the form
+        next_page = request.args.get('page')
+        if not next_page:
+            next_page = None
+
+        return redirect(url_for('main.trans_edit',page=next_page))
 
 
     return render_template('transactions/edit.html',
                         title='Edit Transactions',
                         form=form,
-                        transactions=transactions
+                        transactions=transactions.items,
+                        next_url=next_url,
+                        prev_url=prev_url
                         )
-
 
 @bp.route('/trans/delete', methods=['GET','POST'])
 @login_required
 def trans_delete():
+    # TODO: ended budget categories still have transactions visible. Is this a bug or a feature? The whole point of 
+    #   allowing budgets to be ended rather than deleted was to retain the historical data on spending. 
     page = request.args.get('page',1,type=int)
 
-    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
-    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).paginate(page,10,False).items]
+    transactions = current_user.transactions.order_by(Transaction.date.desc()).paginate(page,10,False)
+
+    next_url = url_for('main.trans_delete', page=transactions.next_num) \
+        if transactions.has_next else None
+    prev_url = url_for('main.trans_delete', page=transactions.prev_num) \
+        if transactions.has_prev else None
 
     form = DeleteTransactionForm()
 
@@ -357,10 +403,12 @@ def trans_delete():
     return render_template('transactions/delete.html',
                     title='Delete Transactions',
                     form=form,
-                    transactions=transactions
+                    transactions=transactions.items,
+                    next_url=next_url,
+                    prev_url=prev_url
                     )
 
-@bp.route('/trans/view"', methods=['GET','POST'])
+@bp.route('/trans/view', methods=['GET','POST'])
 @login_required
 def trans_view():
     page = request.args.get('page',1,type=int)
@@ -378,3 +426,70 @@ def trans_view():
                             next_url=next_url,
                             prev_url=prev_url
                             )
+
+@bp.route('/trans/transfer',methods=['GET','POST'])
+@login_required
+def trans_transfer():
+    page = request.args.get('page',1,type=int)
+
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).paginate(page,
+        10,False)
+
+    next_url = url_for('main.trans_view', page=budget_categories.next_num) \
+        if budget_categories.has_next else None
+    prev_url = url_for('main.trans_view', page=budget_categories.prev_num) \
+        if budget_categories.has_prev else None
+
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+
+    form = TransferForm()
+
+    form.from_category.choices += budget_choices
+    form.to_category.choices += budget_choices
+
+    if form.validate_on_submit():
+        if form.from_category.data == 'S':
+            flash('Please enter a budget to transfer from.')
+        elif form.to_category.data == 'S':
+            flash('Please enter a budget to transfer to.')
+        else:
+            from_category = current_user.budget_categories.filter_by(id=form.from_category.data).first()
+            to_category = current_user.budget_categories.filter_by(id=form.to_category.data).first()
+
+            from_transaction = Transaction(id_user = current_user.id,
+                                    id_budget_category = form.from_category.data,
+                                    amount = form.trans_amount.data,
+                                    note = "Transfer to {}".format(to_category.category_title),
+                                    ttype = "E")
+            db.session.add(from_transaction)
+
+            to_transaction = Transaction(id_user = current_user.id,
+                                    id_budget_category = form.to_category.data,
+                                    amount = form.trans_amount.data,
+                                    note = "Transfer from {}".format(from_category.category_title),
+                                    ttype = "I")
+            db.session.add(to_transaction)
+            db.session.commit()
+            
+            from_transaction.apply_transaction()
+            to_transaction.apply_transaction()
+            
+            flash("${:.2f} was transfered from {} to {}".format(form.trans_amount.data, 
+                                                                from_category.category_title,
+                                                                to_category.category_title))
+
+        next_page = request.args.get('page')
+        if not next_page:
+            next_page = None
+
+        return redirect(url_for('main.trans_transfer',page=next_page))
+
+    return render_template('transactions/transfer.html',
+                        title='Transfer',
+                        form=form,
+                        budget_categories=budget_categories.items,
+                        next_url=next_url,
+                        prev_url=prev_url
+                        )
+
+
