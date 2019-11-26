@@ -3,38 +3,19 @@
 
 {% block app_content %}
 
-    <h1>Delete or End Budget Category</h1>
+    <h2>Delete or End Budget Category</h2>
 
     <h3>Select a Category to Delete or End</h3>
     <br>
     <form class="form form-horizontal" method="post" role="form">
         {{ form.hidden_tag() }}
         {{ wtf.form_errors(form, hiddens="only") }}
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th class="col-md-12">Budget Category</th>
-                </tr>
-            </thead>    
-            <tbody>
-                {% for option in form.select_budget %}
-                <tr>
-                    <th scope='row'>{{ option }}</th>
-                    {% for category in budget_categories if category.id == option.data%}
-                    <td>{{ category.category_title }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table >
+
+        {% include 'budgets/_select_budget_categories.html' %}
+
         <br>
         <div class="row">
             <h3>Delete or End the Budget?</h3>
-        </div>
-        <div class="row">
-            <!-- TODO: remove note once end function implemented -->
-            <h4><i><b>Note:</b> Only delete functionality is implemented at this time.</i></h4>
         </div>
         <div class="row">
             {{ form.delete_or_end_budget(style="list-style:none") }}

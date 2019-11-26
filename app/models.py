@@ -13,9 +13,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    budget_categories = db.relationship('Budget_Category', backref='user', lazy='dynamic')
-    budget_histories = db.relationship('Budget_History', backref='user', lazy='dynamic')
-    transactions = db.relationship('Transaction', backref='user', lazy='dynamic')
+    budget_categories = db.relationship('Budget_Category', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
+    budget_histories = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
+    transactions = db.relationship('Transaction', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -52,7 +52,7 @@ class Budget_Category(db.Model):
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     category_title = db.Column(db.String(64), index=True)
     current_balance = db.Column(db.DECIMAL)
-    budget_history = db.relationship('Budget_History',backref='budget_category',lazy='dynamic')
+    budget_history = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='budget_category',lazy='dynamic')
     status = db.Column(db.CHAR,index=True,default="A")
     transactions = db.relationship('Transaction',backref='budget_category',lazy='dynamic')
 
@@ -109,7 +109,7 @@ class Transaction(db.Model):
         db.session.commit()
         self.apply_transaction()
 
-    def flip_trans_type(self):
+    def change_trans_type(self):
         self.unapply_transaction()
         if self.ttype == 'E':
             self.ttype = 'I'
@@ -123,7 +123,6 @@ class Transaction(db.Model):
         self.id_budget_category = id_new_category
         db.session.commit()
         self.apply_transaction()
-
 
 @login.user_loader
 def load_user(id):

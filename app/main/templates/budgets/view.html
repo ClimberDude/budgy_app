@@ -3,36 +3,8 @@
 
 {% block app_content %}
 
-    <h1>View Budgets</h1>
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th class="col-md-4">Category Title</th>
-                <th class="col-md-4">Annual Budget</th>
-                <th class="col-md-4">Current Balance</th>
-            </tr>
-        </thead>
-    {% for budget in budgets %}
-    
-        {% include 'budgets/_budgets.html' %}
-    
-    {% endfor %}
-    </table>
-    <nav aria-label="...">
-        <ul class="pager">
-            <li class="previous{% if not prev_url %} disabled{% endif %}">
-                <a href="{{ prev_url or '#' }}">
-                    <span aria-hidden="true">&larr;</span> {{ 'Prev' }}
-                </a>
-            </li>
-            <li class="next{% if not next_url %} disabled{% endif %}">
-                <a href="{{ next_url or '#' }}">
-                    {{ 'Next' }} <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-    
-
+    <h2>View Budgets</h2>
+   
+    {% include 'budgets/_display_budget_categories.html' %}
     
 {% endblock %}
