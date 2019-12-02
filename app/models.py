@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     budget_categories = db.relationship('Budget_Category', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     budget_histories = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     transactions = db.relationship('Transaction', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
+    unallocated_income = db.Column(db.DECIMAL)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -36,6 +37,9 @@ class User(UserMixin, db.Model):
             current_app.config['SECRET_KEY'],
             algorithm='HS256').decode('utf-8')
 
+    def adjust_unallocated_income(self,amount):
+        self.unallocated_income += amount
+
     @staticmethod
     def verify_reset_password_token(token):
         try:
@@ -51,6 +55,7 @@ class Budget_Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     category_title = db.Column(db.String(64), index=True)
+    spending_category = db.Column(db.String(64), index=True)
     current_balance = db.Column(db.DECIMAL)
     budget_history = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='budget_category',lazy='dynamic')
     status = db.Column(db.CHAR,index=True,default="A")
@@ -59,6 +64,8 @@ class Budget_Category(db.Model):
     def __repr__(self):
         return '<Budget Category {}>'.format(self.category_title)
 
+    def fund_budget(self,amount):
+        self.current_balance += amount
 
 class Budget_History(db.Model):
     __tablename__ = 'budget_history'
