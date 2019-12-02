@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+
+<h2>Funding Budgets</h2>
+<form class="form form-horizontal" method="post" role="form">
+    {{ form.hidden_tag() }}
+    {{ wtf.form_errors(form, hiddens="only") }}
+
+    <div class="row">
+        <div class="col-md-3">
+            {{ "$%.2f"|format(unallocated_income) }}
+        </div>
+        <div class="col-md-4">
+            Remaining income to be allocated.
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-3">
+            {{ form.unallocated_income(**{"oninput":"sumEntries()"}) }}
+        </div>
+        <div class="col-md-4">
+            New income to be allocated.
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-3">
+            <b><p id="remainder"></p></b>
+        </div>
+        <div class="col-md-4">
+            Total remaining to be allocated.
+        </div>
+    </div>
+    <br>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Add to Balance</th>
+                <th class="col-md-">Category Title</th>
+                <th class="col-md-3">Spending Category</th>
+                <th class="col-md-3">Annual Budget</th>
+                <th class="col-md-3">Current Balance</th>
+            </tr>
+        </thead>
+        <tbody>  
+            {% for form in form.fund_budgets %}
+            {{ form.hidden_tag() }}
+
+            <tr>
+                {% for item in form if item.widget.input_type!='hidden'%}
+                <th scope="row">{{ item(**{"oninput":"sumEntries()"}) }}</th>
+                {% endfor %}
+                {% for category in budget_categories if category.id == form.name %}
+                <td>{{ category.category_title }}</td>
+                <td>{{ category.spending_category }}</td>
+                    {% for history in category.budget_history if history.status == 'C' %}
+                <td>{{ "$%.2f"|format(history.annual_budget) }}</td>
+                    {% endfor %}
+                <td>{{ "$%.2f"|format(category.current_balance) }}</td>       
+                {% endfor %}
+            </tr>    
+            {% endfor %}
+        </tbody>
+    </table >
+
+    {{ form.submit }}
+
+</form>
+<script>
+    function sumEntries() {
+        var prev_entry = Number({{ unallocated_income|safe }})
+        var entry = Number(document.querySelector("#entry").value)
+
+        var values = document.querySelectorAll("#fund");
+        
+        var sum = 0;
+        for ( var i = 0; i < values.length; i++) {   
+            sum += Number(values[i].value);
+        }
+
+        document.getElementById("remainder").innerHTML = prev_entry + entry - sum
+
+    }
+</script>
+{% endblock %}

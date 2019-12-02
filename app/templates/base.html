@@ -26,6 +26,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_add') }}">Add New Budgets</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.budget_fund') }}">Fund Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_edit') }}">Edit Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_delete') }}">Delete Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_view') }}">View Budgets</a></li>
@@ -88,8 +89,5 @@
     {{ super() }}
     {{ moment.include_moment() }}
 
-    <!-- Experimenting with different css stylesheets
-    <link rel="stylesheet"
-      href="{{url_for('static', filename='mystyle.css')}}">
-    -->
+    
 {% endblock %}

@@ -1,8 +1,9 @@
 from app.models import User
 from datetime import datetime
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DecimalField, \
-    RadioField, SelectField, DateField
+    RadioField, SelectField, DateField, FieldList, FormField
 from wtforms.validators import DataRequired, Email, EqualTo, Optional, ValidationError, NoneOf
 
 ###################################################################
@@ -11,17 +12,23 @@ from wtforms.validators import DataRequired, Email, EqualTo, Optional, Validatio
 
 class AddBudgetForm(FlaskForm):
     category_title = StringField('Category Title', validators=[DataRequired()])
+    spending_category = StringField('Spending Category', validators=[DataRequired()])
     current_balance = DecimalField('Current Balance', validators=[Optional()])
     target_period = SelectField('Budget Period',validators=[DataRequired()], choices=[(1,'Bi-Weekly'),(2,'Monthly'),(3,'Annual')],coerce=int)
     target_value = DecimalField("Budget Target",validators=[DataRequired()])
 
     submit = SubmitField("Submit Budget")
 
+class AddBatchBudgetForm(FlaskForm):
+    budget_csv_file = FileField('CSV File',validators=[Optional()])
+    submit_batch = SubmitField("Submit Budget File")
+
 class EditBudgetForm(FlaskForm):
 
     select_budget = RadioField('Select Budget', choices=[], validators=[DataRequired()], coerce=int)
 
     category_title = StringField('Category Title', validators=[Optional()])
+    spending_category = StringField('Spending Category', validators=[Optional()])
     current_balance = DecimalField('Current Balance', validators=[Optional()])
     target_period = SelectField('Budget Period',choices=[(1,'Bi-Weekly'),(2,'Monthly'),(3,'Annual')],coerce=int)
     target_value = DecimalField("Budget Target",validators=[Optional()])
@@ -35,6 +42,15 @@ class DeleteBudgetForm(FlaskForm):
 
     submit = SubmitField("Delete or End Category")
 
+class FundBudgetEntryForm(FlaskForm):
+    fund_value = DecimalField(id="fund",validators=[Optional()])
+
+class FundingForm(FlaskForm):
+    unallocated_income = DecimalField(id="entry",validators=[Optional()])
+    fund_budgets = FieldList(FormField(FundBudgetEntryForm),validators=[Optional()],min_entries=1)
+    submit = SubmitField("Submit Funding Allotments")
+
+
 ############################################
 #Forms for manipulating Transaction objects#
 ############################################
@@ -42,13 +58,18 @@ class DeleteBudgetForm(FlaskForm):
 class AddTransactionForm(FlaskForm):
     # TODO: display the date in form as local date, not UTC.
     trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
-    trans_type = SelectField('Type',validators=[DataRequired()],choices=[('E','Expense'),('I','Income')], coerce=str)
+    trans_type = SelectField('Type',validators=[Optional()],choices=[('E','Expense'),('I','Income')], coerce=str)
     trans_amount = DecimalField('Amount',validators=[DataRequired()])
     # TODO: figure out form validation with SelectField
     trans_category = SelectField('Budget Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
     trans_vendor = StringField('Vendor',validators=[Optional()])
     trans_note = StringField('Note',validators=[Optional()])
     submit = SubmitField("Submit Transaction")
+
+class AddBatchTransactionForm(FlaskForm):
+    trans_csv_file = FileField('CSV File',validators=[Optional()])
+    submit_batch = SubmitField("Submit Transaction File")
+
 
 class EditTransactionForm(FlaskForm):
     select_trans = RadioField('Select Transaction', choices=[], validators=[DataRequired()], coerce=int)

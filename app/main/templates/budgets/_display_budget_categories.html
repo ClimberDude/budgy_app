@@ -1,15 +1,17 @@
 <table class="table table-hover">
     <thead>
         <tr>
-            <th class="col-md-4">Category Title</th>
-            <th class="col-md-4">Annual Budget</th>
-            <th class="col-md-4">Current Balance</th>
+            <th class="col-md-3">Category Title</th>
+            <th class="col-md-3">Spending Category</th>
+            <th class="col-md-3">Annual Budget</th>
+            <th class="col-md-3">Current Balance</th>
         </tr>
     </thead>
     <tbody>  
         {% for category in budget_categories %}
         <tr>
             <td>{{ category.category_title }}</td>
+            <td>{{ category.spending_category }}</td>
                 {% for history in category.budget_history if history.status == 'C' %}
             <td>{{ "$%.2f"|format(history.annual_budget) }}</td>
                 {% endfor %}
