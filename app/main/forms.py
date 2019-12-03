@@ -1,7 +1,7 @@
 from app.models import User
 from datetime import datetime
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DecimalField, \
     RadioField, SelectField, DateField, FieldList, FormField
 from wtforms.validators import DataRequired, Email, EqualTo, Optional, ValidationError, NoneOf
@@ -20,7 +20,7 @@ class AddBudgetForm(FlaskForm):
     submit = SubmitField("Submit Budget")
 
 class AddBatchBudgetForm(FlaskForm):
-    budget_csv_file = FileField('CSV File',validators=[Optional()])
+    budget_csv_file = FileField('CSV File',validators=[FileRequired(),FileAllowed(['csv'],'Only CSV files are accepted.')])
     submit_batch = SubmitField("Submit Budget File")
 
 class EditBudgetForm(FlaskForm):
@@ -33,7 +33,7 @@ class EditBudgetForm(FlaskForm):
     target_period = SelectField('Budget Period',choices=[(1,'Bi-Weekly'),(2,'Monthly'),(3,'Annual')],coerce=int)
     target_value = DecimalField("Budget Target",validators=[Optional()])
 
-    submit = SubmitField("Submit Budget Changes")
+    submit = SubmitField("Submit Changes")
 
 class DeleteBudgetForm(FlaskForm):
 
@@ -67,8 +67,8 @@ class AddTransactionForm(FlaskForm):
     submit = SubmitField("Submit Transaction")
 
 class AddBatchTransactionForm(FlaskForm):
-    trans_csv_file = FileField('CSV File',validators=[Optional()])
-    submit_batch = SubmitField("Submit Transaction File")
+    trans_csv_file = FileField('CSV File',validators=[FileRequired(),FileAllowed(['csv'],'Only CSV files are accepted.')])
+    submit_batch = SubmitField("Submit Trans. File")
 
 
 class EditTransactionForm(FlaskForm):
@@ -82,7 +82,7 @@ class EditTransactionForm(FlaskForm):
     trans_vendor = StringField('Vendor',validators=[Optional()])
     trans_note = StringField('Note',validators=[Optional()])
 
-    submit = SubmitField("Submit Transaction Changes")
+    submit = SubmitField("Submit Trans. Edits")
 
 class DeleteTransactionForm(FlaskForm): 
     select_trans = RadioField('Select Transaction', choices=[], validators=[DataRequired()], coerce=int)

@@ -2,31 +2,30 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 bg-info">
+        <h3><u>Balance Transfer</u></h3>
+        <br><br>    
+        <form class="form form-horizontal" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
 
-<form class="form form-horizontal" method="post" role="form">
-{{ form.hidden_tag() }}
-{{ wtf.form_errors(form, hiddens="only") }}
-<h2>Transfer Between Budgets</h2>
-<div class="row">
-    <div class="col-md-4">
-        <h4>Enter Transfer Data</h4>
-        <br>
-
-        {% for item in form if item.widget.input_type!='hidden' %}
-        <div class="row">
-            <div class="col-md-3">{{ item.label }}</div>
-            <div class="col-md-3">{{ item }}</div> 
+            {% for item in form if item.widget.input_type!='hidden' %}
+            <div class="row">
+                <div class="col-md-5">{{ item.label }}</div>
+                <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
+            </div>
+            <br>
+            {% endfor %}
+        </form>
         </div>
-        <br>
-        {% endfor %}
-    </div>
-    <div class="col-md-8">
-        <h4>Current Budget Data</h4>
-        {% include 'budgets/_display_budget_categories.html' %}
+        <div class="col-md-8">
+            <h4>Current Budget Data</h4>
+            <br>
+            {% include 'budgets/_display_budget_categories.html' %}
+        </div>
     </div>
 </div>
-
-</form>
-        
 
 {% endblock %}
