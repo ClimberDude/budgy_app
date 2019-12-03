@@ -26,6 +26,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown01">
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_add') }}">Add New Budgets</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.budget_fund') }}">Fund Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_edit') }}">Edit Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_delete') }}">Delete Budgets</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.budget_view') }}">View Budgets</a></li>
@@ -38,6 +39,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown02">
                             <li class="dropdown-item"><a href="{{ url_for('main.trans_add') }}">Add Transactions</a></li>
+                            <li class="dropdown-item"><a href="{{ url_for('main.trans_transfer') }}">Balance Transfer</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.trans_edit') }}">Edit Transactions</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.trans_delete') }}">Delete Transactions</a></li>
                             <li class="dropdown-item"><a href="{{ url_for('main.trans_view') }}">View Transactions</a></li>
@@ -87,8 +89,20 @@
     {{ super() }}
     {{ moment.include_moment() }}
 
-    <!-- Experimenting with different css stylesheets
-    <link rel="stylesheet"
-      href="{{url_for('static', filename='mystyle.css')}}">
+    <!-- <link rel="stylesheet" href="{{url_for('static', filename='mystyle.css')}}"> -->
+    
+    <!-- Using a CDN
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
     -->
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datatables.min.css')}}">
+    <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+    <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='datatables.min.js') }}"></script>
+    <script>
+        $(document).ready( function () {
+            $('#responsive').DataTable();
+        } );
+    </script>
 {% endblock %}

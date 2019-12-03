@@ -1,0 +1,30 @@
+<table id="responsive" class="display">
+    <thead>
+        <tr>
+            <th class="col-md-2">Date</th>
+            <th class="col-md-1">Amount</th>
+            <th class="col-md-1">Type</th>
+            <th class="col-md-2">Budget Category</th>
+            <th class="col-md-2">Vendor</th>
+            <th class="col-md-4">Note</th>
+        </tr>
+    </thead>
+    <tbody>  
+        {% for trans in transactions %}
+        <tr>
+            <td>{{ moment(trans.date).format('ll') }}</td>
+            <td>{{ "$%.2f"|format(trans.amount) }}</td>
+            {% if trans.ttype == 'E' %}
+            <td>Expense</td>
+            {% elif trans.ttype == 'I' %}
+            <td>Income</td>
+            {% else %}
+            <td></td>
+            {% endif %}
+            <td>{{ trans.budget_category.category_title }}</td>
+            <td>{{ trans.vendor }}</td>
+            <td>{{ trans.note }}</td>         
+        </tr>  
+        {% endfor %}     
+    </tbody>
+</table >

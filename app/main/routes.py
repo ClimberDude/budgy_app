@@ -1,14 +1,24 @@
 from app import db
 from app.main import bp
-from app.main.forms import AddBudgetForm, EditBudgetForm, DeleteBudgetForm, \
-                            AddTransactionForm, EditTransactionForm, DeleteTransactionForm
+from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
+                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, DeleteTransactionForm, \
+                            TransferForm, FundingForm
 
-from app.models import Budget_Category, Budget_History, Transaction
+from app.models import User, Budget_Category, Budget_History, Transaction
+
+from app.main import csv_read
+
+import csv
 
 from datetime import datetime
 
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user, login_required
+
+from io import StringIO
+
+from werkzeug import secure_filename
+from werkzeug.datastructures import CombinedMultiDict
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/landing', methods=['GET', 'POST'])
@@ -20,14 +30,18 @@ def landing():
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     form=AddBudgetForm()
+    form_batch=AddBatchBudgetForm()
 
     if form.validate_on_submit():
+
         budget_category= Budget_Category(id_user = current_user.id,
-                                         category_title = form.category_title.data,
-                                         current_balance = form.current_balance.data)
+                                         category_title = form.category_title.data.title(),
+                                         spending_category = form.spending_category.data.title(),
+                                         current_balance = form.current_balance.data,
+                                         status='A')
 
         db.session.add(budget_category)
         db.session.commit()
@@ -51,9 +65,20 @@ def budget_add():
         flash('Category {} has been added.'.format(budget_category.category_title))
         return redirect(url_for('main.budget_add'))
 
+    if form_batch.validate_on_submit():
+        # try:
+        if form_batch.budget_csv_file.data:
+            file = form_batch.budget_csv_file.data.read().decode('utf-8')
+            csv_read.import_budgets_from_csv(StringIO(file))
+            return redirect(url_for('main.budget_add'))
+        # except:
+        #     flash('There was an error processing your csv file.')    
+
+
     return render_template('budgets/add.html',
                            title='Add Budget',
                            form=form,
+                           form_batch=form_batch,
                            budget_categories=budget_categories)
 
 @bp.route('/budget/edit', methods=['GET', 'POST'])
@@ -61,14 +86,14 @@ def budget_add():
 def budget_edit():
     #Populate the list of radio button choices with the current list of
     #budget categories
-    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     #Instantiate the form
     form = EditBudgetForm()
-
+    # TODO: add a spending category field to the budget edit form. 
     #Pass dynamic radio button data to the form
     form.select_budget.choices = radio_choices
 
@@ -83,7 +108,7 @@ def budget_edit():
             if form.category_title.data == category.category_title:
                 flash("The category title you've entered matches your old title!")
             else:
-                category.category_title = form.category_title.data
+                category.category_title = form.category_title.data.title()
                 flash("The category title has been changed.")
 
         if form.current_balance.data:
@@ -148,10 +173,10 @@ def budget_delete():
 
     #Populate the list of radio button choices with the current list of
     #budget categories
-    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     #Instantiate the form
     form = DeleteBudgetForm()
@@ -170,16 +195,21 @@ def budget_delete():
             #Delete budget category
             # TODO: remove any applicable budget history table entries along with the 
             #   budget category data. Look into adding cascading delete to the relationship in db model.
-            db.session.delete(category)
+            if category.transactions.first() != None:
+                flash("The category you are trying to delete has transactions posted against it and cannot be deleted.")
+                return redirect(url_for('main.budget_delete'))
+            else:
+                db.session.delete(category)
+                db.session.commit()
+
+                flash('The budget category has been deleted.')
+                return redirect(url_for('main.budget_delete'))
+
+        elif delete_or_end == 2:
+            category.status = 'E'
             db.session.commit()
 
-            flash('The category has been deleted.')
-            return redirect(url_for('main.budget_delete'))
-        elif delete_or_end == 2:
-            # TODO: implement the end functionality once the database table has been updated to accept 
-            #   a status character.
-
-            flash("Ending a category is not yet implemented.")
+            flash("The budget category has been ended, but historical data has been retained.")
             return redirect(url_for('main.budget_delete'))
 
     return render_template('budgets/delete.html',
@@ -190,35 +220,89 @@ def budget_delete():
 @bp.route('/budget/view', methods=['GET','POST'])
 @login_required
 def budget_view():
-    page = request.args.get('page',1,type=int)
-    budgets = current_user.budget_categories.order_by(Budget_Category.category_title.asc()).paginate(page,
-        10, False)
-
-    next_url = url_for('main.budget_view', page=budgets.next_num) \
-        if budgets.has_next else None
-    prev_url = url_for('main.budget_view', page=budgets.prev_num) \
-        if budgets.has_prev else None
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
 
     return render_template('budgets/view.html',
                             title='View Budgets',
-                            budgets=budgets.items,
-                            next_url=next_url,
-                            prev_url=prev_url
+                            budget_categories=budget_categories,
+                            )
+
+@bp.route('/budget/fund', methods=['GET','POST'])
+@login_required
+def budget_fund():
+    form_categories = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc())]
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
+    unallocated_income = current_user.unallocated_income
+
+    form = FundingForm(fund_budgets=form_categories)
+
+    i=0
+    for budget in form.fund_budgets:
+        budget.name = form_categories[i][0]
+        budget.label = form_categories[i][1]
+        i += 1
+
+    if form.validate_on_submit():
+        fund_sum = 0
+        for budget in form.fund_budgets:
+            if budget.data['fund_value'] != None:
+                transaction = Transaction(id_user = current_user.id,
+                            id_budget_category = budget.name,
+                            amount = budget.data['fund_value'],
+                            vendor = None,
+                            note = "Allocated by funding.",
+                            ttype = "I")
+                fund_sum += budget.data['fund_value']
+                db.session.add(transaction)
+                db.session.commit()
+
+                transaction.apply_transaction()
+                flash("{} was allocated ${:.2f}".format(transaction.budget_category.category_title,transaction.amount))
+        
+        if form.unallocated_income.data:
+            unallocated_income = unallocated_income + form.unallocated_income.data - fund_sum
+        else:
+            unallocated_income -= fund_sum
+
+        current_user.unallocated_income = unallocated_income
+        db.session.commit()
+
+        flash("${:.2f} was unallocated, and was saved for future allocation.".format(unallocated_income))
+
+        return redirect(url_for('main.budget_fund'))
+
+    return render_template('budgets/fund.html',
+                            title='Fund Budgets',
+                            form=form,
+                            budget_categories=budget_categories,
+                            unallocated_income=unallocated_income
                             )
 
 #route functions related to handling transactions
 @bp.route('/trans/add', methods=['GET','POST'])
 @login_required
 def trans_add():
-    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
-    budget_categories = current_user.budget_categories.order_by(Budget_Category.category_title).all()
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     form = AddTransactionForm()
-
     form.trans_category.choices += budget_choices
 
-    if form.validate_on_submit():
+    form_batch = AddBatchTransactionForm()
 
+    if form_batch.validate_on_submit():
+        try:
+            if form_batch.trans_csv_file.data:
+                file = form_batch.trans_csv_file.data.read().decode('utf-8')
+                csv_read.import_trans_from_csv(StringIO(file))
+                return redirect(url_for('main.trans_add'))
+
+        except:
+            flash('There was an error processing your csv file.')    
+        
+        return redirect(url_for('main.trans_add'))
+
+    if form.validate_on_submit():
         if form.trans_category.data == 0:
             flash('Please select a valid category')
             return redirect(url_for('main.trans_add'))
@@ -227,8 +311,8 @@ def trans_add():
                                     id_budget_category = form.trans_category.data,
                                     date = form.trans_date.data,
                                     amount = form.trans_amount.data,
-                                    vendor = form.trans_vendor.data,
-                                    note = form.trans_note.data,
+                                    vendor = form.trans_vendor.data.title(),
+                                    note = form.trans_note.data.capitalize(),
                                     ttype = form.trans_type.data)
         
         db.session.add(transaction)
@@ -237,11 +321,13 @@ def trans_add():
         transaction.apply_transaction()
 
         flash("Your transaction has been added.")
+        
         return redirect(url_for('main.trans_add'))
 
     return render_template('transactions/add.html',
                             title='Add Transactions',
                             form=form,
+                            form_batch=form_batch,
                             budget_categories=budget_categories,
                             )
 
@@ -250,7 +336,8 @@ def trans_add():
 def trans_edit():
     trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
     transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
-    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.order_by(Budget_Category.category_title).all()]
+    
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     form = EditTransactionForm() 
     form.select_trans.choices = trans_choices
@@ -280,7 +367,7 @@ def trans_edit():
             if form.trans_type.data == transaction.ttype:
                 flash("The new type you've entered matches the existing type.")
             else:
-                transaction.flip_trans_type()
+                transaction.change_trans_type()
                 flash_note += [2]
 
         if form.trans_category.data != 0:
@@ -294,7 +381,7 @@ def trans_edit():
             if form.trans_vendor.data == transaction.vendor:
                 flash("The new vendor you've entered matches the existing vendor.")
             else:
-                transaction.vendor = form.trans_vendor.data
+                transaction.vendor = form.trans_vendor.data.title()
                 db.session.commit()
                 flash_note += [4]
 
@@ -302,7 +389,7 @@ def trans_edit():
             if form.trans_note.data == transaction.note:
                 flash("The new note you've entered matches the existing note.")
             else:
-                transaction.note = form.trans_note.data
+                transaction.note = form.trans_note.data.capitalize()
                 db.session.commit()
                 flash_note += [5]
 
@@ -327,15 +414,14 @@ def trans_edit():
     return render_template('transactions/edit.html',
                         title='Edit Transactions',
                         form=form,
-                        transactions=transactions
+                        transactions=transactions,
                         )
-
 
 @bp.route('/trans/delete', methods=['GET','POST'])
 @login_required
 def trans_delete():
-    page = request.args.get('page',1,type=int)
-
+    # TODO: ended budget categories still have transactions visible. Is this a bug or a feature? The whole point of 
+    #   allowing budgets to be ended rather than deleted was to retain the historical data on spending. 
     trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
     transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
 
@@ -357,24 +443,68 @@ def trans_delete():
     return render_template('transactions/delete.html',
                     title='Delete Transactions',
                     form=form,
-                    transactions=transactions
+                    transactions=transactions,
                     )
 
-@bp.route('/trans/view"', methods=['GET','POST'])
+@bp.route('/trans/view', methods=['GET','POST'])
 @login_required
 def trans_view():
-    page = request.args.get('page',1,type=int)
-
-    transactions = current_user.transactions.order_by(Transaction.date.desc()).paginate(page,
-        10, False)
-    next_url = url_for('main.trans_view', page=transactions.next_num) \
-        if transactions.has_next else None
-    prev_url = url_for('main.trans_view', page=transactions.prev_num) \
-        if transactions.has_prev else None
+    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
 
     return render_template('transactions/view.html',
                             title='View Transactions',
-                            transactions=transactions.items,
-                            next_url=next_url,
-                            prev_url=prev_url
+                            transactions=transactions
                             )
+
+@bp.route('/trans/transfer',methods=['GET','POST'])
+@login_required
+def trans_transfer():
+    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
+
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+
+    form = TransferForm()
+
+    form.from_category.choices += budget_choices
+    form.to_category.choices += budget_choices
+
+    if form.validate_on_submit():
+        if form.from_category.data == 'S':
+            flash('Please enter a budget to transfer from.')
+        elif form.to_category.data == 'S':
+            flash('Please enter a budget to transfer to.')
+        else:
+            from_category = current_user.budget_categories.filter_by(id=form.from_category.data).first()
+            to_category = current_user.budget_categories.filter_by(id=form.to_category.data).first()
+
+            from_transaction = Transaction(id_user = current_user.id,
+                                    id_budget_category = form.from_category.data,
+                                    amount = form.trans_amount.data,
+                                    note = "Transfer to {}".format(to_category.category_title),
+                                    ttype = "E")
+            db.session.add(from_transaction)
+
+            to_transaction = Transaction(id_user = current_user.id,
+                                    id_budget_category = form.to_category.data,
+                                    amount = form.trans_amount.data,
+                                    note = "Transfer from {}".format(from_category.category_title),
+                                    ttype = "I")
+            db.session.add(to_transaction)
+            db.session.commit()
+            
+            from_transaction.apply_transaction()
+            to_transaction.apply_transaction()
+            
+            flash("${:.2f} was transfered from {} to {}".format(form.trans_amount.data, 
+                                                                from_category.category_title,
+                                                                to_category.category_title))
+
+        return redirect(url_for('main.trans_transfer'))
+
+    return render_template('transactions/transfer.html',
+                        title='Transfer',
+                        form=form,
+                        budget_categories=budget_categories
+                        )
+
+

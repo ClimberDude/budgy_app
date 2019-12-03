@@ -2,48 +2,34 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-
-    <h1>Delete Transactions</h1>
-
-    <h3>Select a Transaction to Delete</h3>
-    <br>
-    <form class="form form-horizontal" method="post" role="form">
-        {{ form.hidden_tag() }}
-        {{ wtf.form_errors(form, hiddens="only") }}
-        
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th class="col-md-2">Date</th>
-                    <th class="col-md-1">Amount</th>
-                    <th class="col-md-1">Type</th>
-                    <th class="col-md-2">Budget Category</th>
-                    <th class="col-md-1">Vendor</th>
-                    <th class="col-md-4">Note</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for option in form.select_trans %}
-                <tr>             
-                    <th>{{ option }}</th>
-                    {% for trans in transactions if trans.id == option.data %}
-                    <td>{{ trans.date }}</td>
-                    <td>{{ "$%.2f"|format(trans.amount) }}</td>
-                    <td>{{ trans.ttype }}</td>
-                    <td>{{ trans.budget_category.category_title }}</td>
-                    <td>{{ trans.vendor }}</td>
-                    <td>{{ trans.note }}</td>
-                    {% endfor %}
-                </tr> 
-                {% endfor %}
-            </tbody>
-        </table>
-        <div class="row">
-            <div class="col-md-2">
-                {{ form.submit }}
-            </div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 bg-info">
+            <h3><u>Delete Transactions</u></h3>
+            <br><br>
+            <form class="form form-horizontal" method="post" role="form">
+            {{ form.hidden_tag() }}
+            {{ wtf.form_errors(form, hiddens="only") }}
+    
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>Select a transaction to the right, and click the button below to delete.</p>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        {{ form.submit }}
+                    </div>
+                </div>
+                <br>
+            </form>
         </div>
-    </form>
-
+        <div class="col-md-8">
+            <h4>Select a Transaction to Delete</h4>
+            <br>
+            {% include 'transactions/_select_transactions.html' %}
+        </div>
+    </div>
+</div>
 {% endblock %}

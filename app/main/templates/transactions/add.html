@@ -2,63 +2,46 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<form class="form form-horizontal" method="post" role="form">
-{{ form.hidden_tag() }}
-{{ wtf.form_errors(form, hiddens="only") }}
-
-    <h1>Add a Transaction</h1>
-
-        <div class="row">
-            <div class="col-md-4">
-                <h4>Enter Transaction Data</h4>
-                <br>
+<div class="container">
         
-                <div class="row">
-                    <div class="col-md-3">{{ form.trans_date.label }}</div>
-                    <div class="col-md-3">{{ form.trans_date }}</div> 
-                </div>
-                <br>
-                <Div class="row">
-                        <div class="col-md-3">{{ form.trans_type.label }}</div>
-                        <div class="col-md-3">
-                            {% for option in form.trans_type %}
-                            <div class="row">
-                                    <div class="col-md-1">{{ option }}</div> 
-                                    <div class="col-md-1">{{ option.label }}</div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                </Div>
-                <br>
-                <div class="row">
-                    <div class="col-md-3">{{ form.trans_amount.label }}</div>
-                    <div class="col-md-3">{{ form.trans_amount }}</div>
-                </div>
-                <br>
-                <div class="row">
-                        <div class="col-md-3">{{ form.trans_category.label }}</div>
-                        <div class="col-md-3">{{ form.trans_category }}</div>
-                </div>
-                <br>
-                <div class="row">
-                        <div class="col-md-3">{{ form.trans_vendor.label }}</div>
-                        <div class="col-md-3">{{ form.trans_vendor }}</div>
-                </div>
-                <br>
-                <div class="row">
-                        <div class="col-md-3">{{ form.trans_note.label }}</div>
-                        <div class="col-md-3">{{ form.trans_note }}</div>
-                </div>
-                <br>
-                <div class="row">
-                        <div class="col-md-3">{{ form.submit }}</div>
-                </div>
-                <br>
-            </div>
+    <div class="row">
+        <div class="col-md-4 bg-info">
+            <h3><u>Add a Transaction</u></h3>
+            <br><br>
 
-            {% include '_display_budget_categories.html' %}
+            <form class="form form-horizontal" method="post" role="form">
+            {{ form.hidden_tag() }}
+            {{ wtf.form_errors(form, hiddens="only") }}
+
+                {% for item in form if item.widget.input_type!='hidden' %}
+                <div class="row">
+                    <div class="col-md-5">{{ item.label }}</div>
+                    <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
+                </div>
+                <br>
+                {% endfor %}
+            </form>
+            <div class="row"><div class="col-md-12" align="center">------ OR ------</div></div>
+            <br>
+
+            <form class="form form-horizontal" method="post" role="form" enctype="multipart/form-data">
+            {{ form_batch.hidden_tag() }}
+            {{ wtf.form_errors(form_batch, hiddens="only") }}
+                    
+                {% for item in form_batch if item.widget.input_type!='hidden' %}
+                <div class="row">
+                    <div class="col-md-5">{{ item.label }}</div>
+                    <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
+                </div>
+                <br>
+                {% endfor %}
+            </form>
         </div>
-
-</form>
-
+        <div class="col-md-8">
+            <h4>Current Budget Data</h4>
+            <br>
+            {% include 'budgets/_display_budget_categories.html' %}
+        </div>
+    </div>
+</div>
 {% endblock %}

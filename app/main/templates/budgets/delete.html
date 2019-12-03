@@ -3,49 +3,49 @@
 
 {% block app_content %}
 
-    <h1>Delete or End Budget Category</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 bg-info">
+            <h3><u>Delete or End Budget Category</u></h3>
+            <br>
 
-    <h3>Select a Category to Delete or End</h3>
-    <br>
-    <form class="form form-horizontal" method="post" role="form">
-        {{ form.hidden_tag() }}
-        {{ wtf.form_errors(form, hiddens="only") }}
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th class="col-md-12">Budget Category</th>
-                </tr>
-            </thead>    
-            <tbody>
-                {% for option in form.select_budget %}
-                <tr>
-                    <th scope='row'>{{ option }}</th>
-                    {% for category in budget_categories if category.id == option.data%}
-                    <td>{{ category.category_title }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table >
-        <br>
-        <div class="row">
-            <h3>Delete or End the Budget?</h3>
+            <form class="form form-horizontal" method="post" role="form">
+            {{ form.hidden_tag() }}
+            {{ wtf.form_errors(form, hiddens="only") }}
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>Delete or End the Budget?</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    {{ form.delete_or_end_budget(style="list-style:none") }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        <B>Deleting</B> will completely remove the budget category. Do this if you made the category in error.<br>
+                        <b>Ending</b> will close the budget, but retain historical data about the category.<br>
+                        <i><b>Note:</b> if a category has any transactions posted against it, you can only end the category</i><br>
+                    </p> 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    {{ form.submit }}
+                </div>
+            </div><br>
+            </form>
         </div>
-        <div class="row">
-            <!-- TODO: remove note once end function implemented -->
-            <h4><i><b>Note:</b> Only delete functionality is implemented at this time.</i></h4>
+        <div class="col-md-8">
+            <h4>Select Budget to be Deleted or Ended</h4>
+            <br>
+            {% include 'budgets/_select_budget_categories.html' %}
         </div>
-        <div class="row">
-            {{ form.delete_or_end_budget(style="list-style:none") }}
-        </div>
-        <div class="row">
-                <h6><B>Deleting</B> will completely remove the budget category. Do this if you made the category in error.</h5>
-                <h6><b>Ending</b> will close the budget, but retain historical data about the category.</h5>
-                <h6><i><b>Note:</b> if a category has any transactions posted against it, you can only end the category</i></h6>   
-        </div>
-        <div class="row">
-            {{ form.submit }}
-        </div>
+    </div>
+</div>
+
 
 {% endblock %}
