@@ -1,8 +1,8 @@
-"""rebuild to implement cascade delete
+"""rebuilding db upon delete
 
-Revision ID: 7f80f3531b38
+Revision ID: 565fe598f344
 Revises: 
-Create Date: 2019-11-26 14:02:16.842125
+Create Date: 2019-12-02 17:46:01.260517
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7f80f3531b38'
+revision = '565fe598f344'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,6 +23,7 @@ def upgrade():
     sa.Column('username', sa.String(length=64), nullable=True),
     sa.Column('email', sa.String(length=120), nullable=True),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
+    sa.Column('unallocated_income', sa.DECIMAL(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
@@ -31,12 +32,14 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_user', sa.Integer(), nullable=True),
     sa.Column('category_title', sa.String(length=64), nullable=True),
+    sa.Column('spending_category', sa.String(length=64), nullable=True),
     sa.Column('current_balance', sa.DECIMAL(), nullable=True),
     sa.Column('status', sa.CHAR(), nullable=True),
     sa.ForeignKeyConstraint(['id_user'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_budget_category_category_title'), 'budget_category', ['category_title'], unique=False)
+    op.create_index(op.f('ix_budget_category_spending_category'), 'budget_category', ['spending_category'], unique=False)
     op.create_index(op.f('ix_budget_category_status'), 'budget_category', ['status'], unique=False)
     op.create_table('budget_history',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -79,6 +82,7 @@ def downgrade():
     op.drop_index(op.f('ix_budget_history_status'), table_name='budget_history')
     op.drop_table('budget_history')
     op.drop_index(op.f('ix_budget_category_status'), table_name='budget_category')
+    op.drop_index(op.f('ix_budget_category_spending_category'), table_name='budget_category')
     op.drop_index(op.f('ix_budget_category_category_title'), table_name='budget_category')
     op.drop_table('budget_category')
     op.drop_index(op.f('ix_user_username'), table_name='user')
