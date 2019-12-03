@@ -2,46 +2,38 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
-        
-    <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Add a Transaction</u></h3>
-            <br><br>
-
-            <form class="form form-horizontal" method="post" role="form">
-            {{ form.hidden_tag() }}
-            {{ wtf.form_errors(form, hiddens="only") }}
-
-                {% for item in form if item.widget.input_type!='hidden' %}
-                <div class="row">
-                    <div class="col-md-5">{{ item.label }}</div>
-                    <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
-                </div>
-                <br>
-                {% endfor %}
-            </form>
-            <div class="row"><div class="col-md-12" align="center">------ OR ------</div></div>
+<h2>Add a Transaction</h2>
+<div class="row">
+    <div class="col-md-4">
+        <form class="form form-horizontal" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+                
+            {% for item in form if item.widget.input_type!='hidden' %}
+            <div class="row">
+                <div class="col-md-3">{{ item.label }}</div>
+                <div class="col-md-3">{{ item }}</div> 
+            </div>
             <br>
-
-            <form class="form form-horizontal" method="post" role="form" enctype="multipart/form-data">
-            {{ form_batch.hidden_tag() }}
-            {{ wtf.form_errors(form_batch, hiddens="only") }}
-                    
-                {% for item in form_batch if item.widget.input_type!='hidden' %}
-                <div class="row">
-                    <div class="col-md-5">{{ item.label }}</div>
-                    <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
-                </div>
-                <br>
-                {% endfor %}
-            </form>
-        </div>
-        <div class="col-md-8">
-            <h4>Current Budget Data</h4>
+            {% endfor %}
+        </form>
+        <div class="row"><div class="col-md-12" align="center">------ OR ------</div></div>
+        <br>
+        <form class="form form-horizontal" method="post" role="form" enctype="multipart/form-data">
+        {{ form_batch.hidden_tag() }}
+        {{ wtf.form_errors(form_batch, hiddens="only") }}
+            
+            {% for item in form_batch if item.widget.input_type!='hidden' %}
+            <div class="row">
+                <div class="col-md-4">{{ item.label }}</div>
+                <div class="col-md-4">{{ item }}</div> 
+            </div>
             <br>
-            {% include 'budgets/_display_budget_categories.html' %}
-        </div>
+            {% endfor %}
+        </form>
+    </div>
+    <div class="col-md-8">
+        {% include 'budgets/_display_budget_categories.html' %}
     </div>
 </div>
 {% endblock %}

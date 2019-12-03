@@ -2,30 +2,30 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
+
+    <h2>Edit Budget Category</h2>
+
     <form class="form form-horizontal" method="post" role="form">
-    {{ form.hidden_tag() }}
-    {{ wtf.form_errors(form, hiddens="only") }}
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Enter Data to be Changed</h3>
+                <br>
 
-    <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Edit Budget Category</u></h3>
-            <br><br>
-
-            {% for item in form if item.name != "select_budget" and item.widget.input_type!='hidden' %}
-            <div class="row">
-                <div class="col-md-5">{{ item.label }}</div>
-                <div class="col-md-7">{{ item(style="width: 100%;") }}</div>
+                {% for item in form if item.name != "select_budget" and item.widget.input_type!='hidden' %}
+                <div class="row">
+                    <div class="col-md-5">{{ item.label }}</div>
+                    <div class="col-md-3">{{ item }}</div>
+                </div>
+                <br>
+                {% endfor %}
             </div>
-            <br>
-            {% endfor %}
+            <div class="col-md-8">
+                <h3>Select a Category to Edit</h3>
+                {% include 'budgets/_select_budget_categories.html' %}
+            </div>
         </div>
-        <div class="col-md-8">
-            <h4>Select a Category to Edit</h4>
-            <br>
-            {% include 'budgets/_select_budget_categories.html' %}
-        </div>
-    </div>
     </form>
-</div>
+
 {% endblock %}
