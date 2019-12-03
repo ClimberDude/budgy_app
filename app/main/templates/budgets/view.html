@@ -2,20 +2,9 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h3><u>View Budgets</u></h3>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col-md-12">
-            {% include 'budgets/_display_budget_categories.html' %}
-        </div>
-    </div>
-</div>
 
+    <h2>View Budgets</h2>
    
+    {% include 'budgets/_display_budget_categories.html' %}
     
 {% endblock %}

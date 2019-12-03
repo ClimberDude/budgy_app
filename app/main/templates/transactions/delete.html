@@ -2,34 +2,22 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Delete Transactions</u></h3>
-            <br><br>
-            <form class="form form-horizontal" method="post" role="form">
-            {{ form.hidden_tag() }}
-            {{ wtf.form_errors(form, hiddens="only") }}
-    
-                <div class="row">
-                    <div class="col-md-12">
-                        <p>Select a transaction to the right, and click the button below to delete.</p>
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <div class="col-md-12">
-                        {{ form.submit }}
-                    </div>
-                </div>
-                <br>
-            </form>
+
+    <h2>Delete Transactions</h2>
+
+    <h3>Select a Transaction to Delete</h3>
+    <br>
+    <form class="form form-horizontal" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        
+        {% include 'transactions/_select_transactions.html' %}
+
+        <div class="row">
+            <div class="col-md-2">
+                {{ form.submit }}
+            </div>
         </div>
-        <div class="col-md-8">
-            <h4>Select a Transaction to Delete</h4>
-            <br>
-            {% include 'transactions/_select_transactions.html' %}
-        </div>
-    </div>
-</div>
+    </form>
+
 {% endblock %}
