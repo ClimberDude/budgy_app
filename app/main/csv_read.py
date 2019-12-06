@@ -48,7 +48,7 @@ def import_budgets_from_csv(budget_file):
     from flask_login import current_user
 
     budget_reader=csv.reader(budget_file,delimiter=",")
-    count = [0,0]
+    count = [0,0,0]
     for row in budget_reader:
 
         if row[0] == 'Budgets':
@@ -61,7 +61,7 @@ def import_budgets_from_csv(budget_file):
                 row[4] = 0.0
 
             if budget_category:
-                flash('The category {} already exists'.format(row[1]))
+                count[2] += 1
             else:
                 budget_category = Budget_Category(id_user=current_user.id,
                                                 category_title=row[1],
@@ -100,7 +100,7 @@ def import_budgets_from_csv(budget_file):
                     transaction.apply_transaction()
                     count[1] += 1
 
-    flash("{} budgets have been created, with {} income transactions applied.".format(count[0],count[1]))
+    flash("{} budgets have been created, {} budgets already existed, with {} income transactions applied.".format(count[0],count[2],count[1]))
 
 
                     

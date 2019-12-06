@@ -12,7 +12,7 @@
     <tbody>  
         {% for trans in transactions %}
         <tr>
-            <td>{{ moment(trans.date).format('ll') }}</td>
+            <td>{{ trans.date }}</td>
             <td>{{ "$%.2f"|format(trans.amount) }}</td>
             {% if trans.ttype == 'E' %}
             <td>Expense</td>

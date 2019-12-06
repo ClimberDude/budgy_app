@@ -37,9 +37,6 @@ class User(UserMixin, db.Model):
             current_app.config['SECRET_KEY'],
             algorithm='HS256').decode('utf-8')
 
-    def adjust_unallocated_income(self,amount):
-        self.unallocated_income += amount
-
     @staticmethod
     def verify_reset_password_token(token):
         try:
@@ -54,7 +51,7 @@ class Budget_Category(db.Model):
     __tablename__ = 'budget_category'
     id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
-    category_title = db.Column(db.String(64), index=True)
+    category_title = db.Column(db.String(64), index=True, unique=True)
     spending_category = db.Column(db.String(64), index=True)
     current_balance = db.Column(db.DECIMAL)
     budget_history = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='budget_category',lazy='dynamic')
@@ -72,7 +69,7 @@ class Budget_History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_budget_category = db.Column(db.Integer, db.ForeignKey('budget_category.id'))
-    start_datetime = db.Column(db.DateTime, default=datetime.utcnow())
+    start_datetime = db.Column(db.DateTime, default=datetime.now())
     end_datetime = db.Column(db.DateTime, nullable=True, default=None)
     status = db.Column(db.CHAR, index=True)
     annual_budget = db.Column(db.DECIMAL)
@@ -85,14 +82,14 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_budget_category = db.Column(db.Integer, db.ForeignKey('budget_category.id'))
-    date = db.Column(db.Date, index=True, default=datetime.utcnow().date())
+    date = db.Column(db.Date, index=True, default=datetime.now().date())
     amount = db.Column(db.DECIMAL, index=True)
     vendor = db.Column(db.String(140))
     note = db.Column(db.String(140))
     ttype = db.Column(db.CHAR,index=True)
 
     def __repr__(self):
-        return '<Transaction at {}: ${}>'.format(self.vendor, self.amount)
+        return '<Transaction on {} at {}: ${}>'.format(self.date, self.vendor, self.amount)
 
     def apply_transaction(self):
         if self.ttype == 'E':

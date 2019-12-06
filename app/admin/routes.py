@@ -9,19 +9,29 @@ from werkzeug.urls import url_parse
 
 @bp.route('/login', methods=['GET','POST'])
 def login():
+    #Checks if user is already authenticated by flask-login
     if current_user.is_authenticated:
         return redirect(url_for('main.landing'))
+
     form=LoginForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
+
+        #Checks if user exists in database, or if supplied password hashes match
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('admin.login'))
+
+        #uses flask-login to log user in
         login_user(user, remember=form.remember_me.data)
+
+        #redirects user to the page they were trying to access, defaults to 'main.landing'
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.landing')
         return redirect(next_page)
+
     return render_template('login.html',
                            title='Login',
                            form=form)
@@ -35,25 +45,36 @@ def logout():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.landing'))
+
     form=RegistrationForm()
+
     if form.validate_on_submit():
         user = User(username=form.username.data,
                     email=form.email.data,
                     unallocated_income=0.0)
+
+        #sets password using method in user model
         user.set_password(form.password.data)
+
         db.session.add(user)
         db.session.commit()
+
         flash("Congratulations! You've successfully registered with Budgy!")
+
         return redirect(url_for('admin.login'))
+
     return render_template('register.html',
                            title='Register',
                            form=form)
 
 @bp.route('/reset_password_request', methods=['GET','POST'])
 def reset_password_request():
+    #assumes that a currently authenticated user won't need password reset.
     if current_user.is_authenticated:
         return redirect(url_for('main.landing'))
+
     form=ResetPasswordRequestForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:

@@ -16,7 +16,11 @@
                 {% for item in form if item.widget.input_type!='hidden' %}
                 <div class="row">
                     <div class="col-md-5">{{ item.label }}</div>
+                    {% if item ==trans_date %}
+                    <div class="input-group date" id="datetimepicker1" >{{ item(style="width: 100%;") }}</div> 
+                    {% else %}
                     <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
+                    {% endif %}
                 </div>
                 <br>
                 {% endfor %}
@@ -43,5 +47,10 @@
             {% include 'budgets/_display_budget_categories.html' %}
         </div>
     </div>
+    <script type="text/javascript">
+        $(function () {
+            $('#datetimepicker1').datetimepicker();
+        });
+    </script>
 </div>
 {% endblock %}

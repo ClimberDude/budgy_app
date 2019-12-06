@@ -51,7 +51,8 @@
                             Visualizations
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown02">
-                                <li class="dropdown-item"><a href="#">Plots & Charts</a></li>
+                                <li class="dropdown-item"><a href="{{ url_for('visuals.income_v_spending') }}">Income vs. Spending</a></li>
+                                <li class="dropdown-item"><a href="{{ url_for('visuals.spending_by_category') }}">Spending by Category</a></li>
                         </ul>    
                     </li>
                     {% endif %}

@@ -20,6 +20,7 @@ class RegistrationForm(FlaskForm):
                                            EqualTo('password')])
     submit = SubmitField('Register')
 
+    
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:

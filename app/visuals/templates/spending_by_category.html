@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 bg-info">
+            <h3><u>Change Spending Plot Variables</u></h3>
+            <br><br>
+            <form class="form form-horizontal" method="post" role="form">
+            {{ form.hidden_tag() }}
+            {{ wtf.form_errors(form, hiddens="only") }}
+
+                {% for item in form if item.widget.input_type!='hidden' %}
+                <div class="row">
+                    <div class="col-md-4">{{ item.label }}</div>
+                    <div class="col-md-8">{{ item(style="width: 100%;") }}</div> 
+                </div>
+                <br>
+                {% endfor %}
+            </form>
+            <br>
+        </div>
+
+        <div class="col-md-8">
+            <canvas id="myChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='chartjs-plugin-colorschemes.min.js') }}"></script>
+    <script>
+        var label = {{ data['label'] | tojson }}
+        var labels = {{ data['labels'] | safe }}
+        var expenses = {{ data['data_expenses'] | safe }}
+                
+        var ctx = document.getElementById('myChart').getContext('2d');
+        
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Expenses",
+                    data: expenses
+                }]
+            },
+            options: {
+                plugins: {
+                    colorschemes: {
+                scheme: 'brewer.Spectral11'
+                    }
+                }
+            }
+        });
+    </script>
+
+</div>
+{% endblock %}

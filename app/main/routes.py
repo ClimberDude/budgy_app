@@ -8,17 +8,12 @@ from app.models import User, Budget_Category, Budget_History, Transaction
 
 from app.main import csv_read
 
-import csv
-
 from datetime import datetime
 
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user, login_required
 
 from io import StringIO
-
-from werkzeug import secure_filename
-from werkzeug.datastructures import CombinedMultiDict
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/landing', methods=['GET', 'POST'])
@@ -55,7 +50,7 @@ def budget_add():
 
         budget_history = Budget_History(id_user = current_user.id,
                                         id_budget_category = budget_category.id,
-                                        start_datetime = datetime.utcnow(),
+                                        start_datetime = datetime.now(),
                                         status = 'C',
                                         annual_budget = annual_budget)
 
@@ -66,13 +61,13 @@ def budget_add():
         return redirect(url_for('main.budget_add'))
 
     if form_batch.validate_on_submit():
-        # try:
-        if form_batch.budget_csv_file.data:
-            file = form_batch.budget_csv_file.data.read().decode('utf-8')
-            csv_read.import_budgets_from_csv(StringIO(file))
-            return redirect(url_for('main.budget_add'))
-        # except:
-        #     flash('There was an error processing your csv file.')    
+        try:
+            if form_batch.budget_csv_file.data:
+                file = form_batch.budget_csv_file.data.read().decode('utf-8')
+                csv_read.import_budgets_from_csv(StringIO(file))
+                return redirect(url_for('main.budget_add'))
+        except:
+            flash('There was an error processing your csv file.')    
 
 
     return render_template('budgets/add.html',
@@ -93,7 +88,6 @@ def budget_edit():
 
     #Instantiate the form
     form = EditBudgetForm()
-    # TODO: add a spending category field to the budget edit form. 
     #Pass dynamic radio button data to the form
     form.select_budget.choices = radio_choices
 
@@ -142,13 +136,13 @@ def budget_edit():
                 #the edit.
 
                 #Populate the obsoleteing information
-                obsolete_history.end_datetime = datetime.utcnow()
+                obsolete_history.end_datetime = datetime.now()
                 obsolete_history.status = 'O'
 
                 #Next, create the new budget history entry from the entered form data
                 current_history = Budget_History(id_user = current_user.id,
                                                  id_budget_category = category.id,
-                                                 start_datetime = datetime.utcnow(),
+                                                 start_datetime = datetime.now(),
                                                  status = 'C',
                                                  annual_budget = annual_budget)
 
@@ -193,8 +187,6 @@ def budget_delete():
 
         if delete_or_end == 1:
             #Delete budget category
-            # TODO: remove any applicable budget history table entries along with the 
-            #   budget category data. Look into adding cascading delete to the relationship in db model.
             if category.transactions.first() != None:
                 flash("The category you are trying to delete has transactions posted against it and cannot be deleted.")
                 return redirect(url_for('main.budget_delete'))
@@ -347,7 +339,6 @@ def trans_edit():
         transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
         flash_note = []
 
-        # TODO: figure out how to handle user and server date issues. How to get user timezone?
         if form.trans_date.data:
             if form.trans_date.data == transaction.date:
                 flash("The new date you've entered matches the existing date.")
@@ -459,6 +450,7 @@ def trans_view():
 @bp.route('/trans/transfer',methods=['GET','POST'])
 @login_required
 def trans_transfer():
+    # TODO: need to implement a TE/TI transfer ttype to properly categorize transfers for visualization purposes.
     budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]

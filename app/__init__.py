@@ -1,4 +1,5 @@
 from config import Config
+from dotenv import load_dotenv
 from flask import Flask, request, current_app
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
@@ -19,6 +20,9 @@ login = LoginManager()
 login.login_view = 'admin.login'
 login.login_message = 'Please log in to access this page.'
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -38,6 +42,9 @@ def create_app(config_class=Config):
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+
+    from app.visuals import bp as visuals_bp
+    app.register_blueprint(visuals_bp, url_prefix='/visuals')
 
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
@@ -60,7 +67,7 @@ def create_app(config_class=Config):
 
         if not os.path.exists('logs'):
             os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/microblog.log',
+        file_handler = RotatingFileHandler('logs/budgy.log',
                                            maxBytes=10240,
                                            backupCount=10)
         file_handler.setFormatter(logging.Formatter(

@@ -3,7 +3,8 @@ from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DecimalField, \
-    RadioField, SelectField, DateField, FieldList, FormField
+    RadioField, SelectField, FieldList, FormField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, Optional, ValidationError, NoneOf
 
 ###################################################################
@@ -56,8 +57,7 @@ class FundingForm(FlaskForm):
 ############################################
 
 class AddTransactionForm(FlaskForm):
-    # TODO: display the date in form as local date, not UTC.
-    trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
+    trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d')#,render_kw={'placeholder':'YYYY-MM-DD'})
     trans_type = SelectField('Type',validators=[Optional()],choices=[('E','Expense'),('I','Income')], coerce=str)
     trans_amount = DecimalField('Amount',validators=[DataRequired()])
     # TODO: figure out form validation with SelectField
