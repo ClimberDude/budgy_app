@@ -1,5 +1,6 @@
 from app.models import User
 from datetime import datetime
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DecimalField, \
@@ -19,6 +20,12 @@ class AddBudgetForm(FlaskForm):
     target_value = DecimalField("Budget Target",validators=[DataRequired()])
 
     submit = SubmitField("Submit Budget")
+
+    def validate_category_title(self, category_title):
+        title = current_user.budget_categories.filter_by(category_title=category_title.data).first()
+        if title is not None:
+            raise ValidationError('Please use a different Category Title.')
+
 
 class AddBatchBudgetForm(FlaskForm):
     budget_csv_file = FileField('CSV File',validators=[FileRequired(),FileAllowed(['csv'],'Only CSV files are accepted.')])
@@ -90,7 +97,7 @@ class DeleteTransactionForm(FlaskForm):
     submit = SubmitField("Delete Transaction")
 
 class TransferForm(FlaskForm):
-    from_category = SelectField('From Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
-    to_category = SelectField('To Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
-    trans_amount = DecimalField('Amount',validators=[Optional()])
+    from_category = SelectField('From Category',validators=[DataRequired()],choices=[(0,'- Select Category -')],default=0,coerce=int)
+    to_category = SelectField('To Category',validators=[DataRequired()],choices=[(0,'- Select Category -')],default=0,coerce=int)
+    trans_amount = DecimalField('Amount',validators=[DataRequired()])
     submit = SubmitField("Submit Transfer")

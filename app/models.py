@@ -92,18 +92,18 @@ class Transaction(db.Model):
         return '<Transaction on {} at {}: ${}>'.format(self.date, self.vendor, self.amount)
 
     def apply_transaction(self):
-        if self.ttype == 'E':
+        if self.ttype == 'E' or self.ttype == 'TE':
             self.budget_category.current_balance -= self.amount
             db.session.commit()
-        elif self.ttype == 'I':
+        elif self.ttype == 'I' or self.ttype == 'TI':
             self.budget_category.current_balance += self.amount
             db.session.commit()
 
     def unapply_transaction(self):
-        if self.ttype == 'E':
+        if self.ttype == 'E' or self.ttype == 'TE':
             self.budget_category.current_balance += self.amount
             db.session.commit()
-        elif self.ttype == 'I':
+        elif self.ttype == 'I' or self.ttype == 'TI':
             self.budget_category.current_balance -= self.amount
             db.session.commit()
 
@@ -114,6 +114,7 @@ class Transaction(db.Model):
         self.apply_transaction()
 
     def change_trans_type(self):
+        # TODO: does this need to include Transfer ttypes?
         self.unapply_transaction()
         if self.ttype == 'E':
             self.ttype = 'I'

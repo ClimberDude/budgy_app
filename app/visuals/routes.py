@@ -74,6 +74,3 @@ def spending_by_category():
                             title='Income vs Spending',
                             form=form,
                             data=data)
-
-
-

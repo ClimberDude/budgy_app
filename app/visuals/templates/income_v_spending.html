@@ -60,6 +60,28 @@
                             beginAtZero: true
                         }
                     }]
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            if (tooltipItem.datasetIndex === 0) {
+                                var value = data.datasets[0].data[tooltipItem.index];
+                                return '$' + value.toFixed(2);    
+                            } else if (tooltipItem.datasetIndex === 1) {
+                                var value = data.datasets[1].data[tooltipItem.index];
+                                return '$' + value.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return '$' + value;
+                            }           
+                        }
+                    }]
                 }
             }
         });

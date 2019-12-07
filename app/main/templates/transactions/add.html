@@ -22,6 +22,13 @@
                     <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
                     {% endif %}
                 </div>
+                {% for error in item.errors %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <span style="color: red; width: 100%;">{{ error }}</span>
+                    </div>
+                </div>
+                {% endfor %}
                 <br>
                 {% endfor %}
             </form>

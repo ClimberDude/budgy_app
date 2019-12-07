@@ -17,4 +17,5 @@ class Config(object):
     ADMINS = ['debug.emails@gmail.com']
     #LANGUAGES = ['en', 'es']
     #MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')
-    ITEMS_PER_PAGE = 55
+    ITEMS_PER_PAGE = 10
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')

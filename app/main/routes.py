@@ -157,14 +157,13 @@ def budget_edit():
         return redirect(url_for('main.budget_edit'))
 
     return render_template('budgets/edit.html',
-                            title='edit_budget',
+                            title='Edit Budget',
                            form=form,
                            budget_categories=budget_categories)
 
 @bp.route('/budget/delete', methods=['GET','POST'])
 @login_required
 def budget_delete():
-
     #Populate the list of radio button choices with the current list of
     #budget categories
     radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
@@ -450,7 +449,6 @@ def trans_view():
 @bp.route('/trans/transfer',methods=['GET','POST'])
 @login_required
 def trans_transfer():
-    # TODO: need to implement a TE/TI transfer ttype to properly categorize transfers for visualization purposes.
     budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
@@ -473,14 +471,14 @@ def trans_transfer():
                                     id_budget_category = form.from_category.data,
                                     amount = form.trans_amount.data,
                                     note = "Transfer to {}".format(to_category.category_title),
-                                    ttype = "E")
+                                    ttype = "TE")
             db.session.add(from_transaction)
 
             to_transaction = Transaction(id_user = current_user.id,
                                     id_budget_category = form.to_category.data,
                                     amount = form.trans_amount.data,
                                     note = "Transfer from {}".format(from_category.category_title),
-                                    ttype = "I")
+                                    ttype = "TI")
             db.session.add(to_transaction)
             db.session.commit()
             

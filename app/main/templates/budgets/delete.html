@@ -4,15 +4,13 @@
 {% block app_content %}
 
 <div class="container">
+    <form class="form form-horizontal" method="post" role="form">
+    {{ form.hidden_tag() }}
+    {{ wtf.form_errors(form, hiddens="only") }} 
     <div class="row">
         <div class="col-md-4 bg-info">
             <h3><u>Delete or End Budget Category</u></h3>
             <br>
-
-            <form class="form form-horizontal" method="post" role="form">
-            {{ form.hidden_tag() }}
-            {{ wtf.form_errors(form, hiddens="only") }}
-
             <div class="row">
                 <div class="col-md-12">
                     <h4>Delete or End the Budget?</h4>
@@ -23,7 +21,15 @@
                     {{ form.delete_or_end_budget(style="list-style:none") }}
                 </div>
             </div>
+            {% for error in form.delete_or_end_budget.errors %}
             <div class="row">
+                <div class="col-md-12">
+                    <span style="color: red; width: 100%;">{{ error }}</span>
+                </div>
+            </div>
+            {% endfor %}
+
+        <div class="row">
                 <div class="col-md-12">
                     <p>
                         <B>Deleting</B> will completely remove the budget category. Do this if you made the category in error.<br>
@@ -37,7 +43,6 @@
                     {{ form.submit }}
                 </div>
             </div><br>
-            </form>
         </div>
         <div class="col-md-8">
             <h4>Select Budget to be Deleted or Ended</h4>
@@ -45,6 +50,7 @@
             {% include 'budgets/_select_budget_categories.html' %}
         </div>
     </div>
+    </form>
 </div>
 
 

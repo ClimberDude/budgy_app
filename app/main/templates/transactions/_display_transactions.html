@@ -18,8 +18,8 @@
             <td>Expense</td>
             {% elif trans.ttype == 'I' %}
             <td>Income</td>
-            {% else %}
-            <td></td>
+            {% elif trans.ttype[0] == 'T' %}
+            <td>Transfer</td>
             {% endif %}
             <td>{{ trans.budget_category.category_title }}</td>
             <td>{{ trans.vendor }}</td>

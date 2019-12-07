@@ -13,19 +13,26 @@ def import_trans_from_csv(trans_file):
     transaction_reader=csv.reader(trans_file,delimiter=",")
     count = 0
     for row in transaction_reader:
-
         if row[0] != 'Transactions' and row[0] != '':
             if row[5] != "Take Home Pay":
-                if float(row[4].replace(',','')) < 0:
-                    ttype = 'I'
-                    row[4]=row[4].replace('-','')
+                amount = row[4].replace(',','')
+                if float(amount) < 0:
+                    if row[6][:8] == 'Transfer' or row[6][:8] == 'transfer':
+                        ttype = 'TI'
+                    else:
+                        ttype = 'I'
+
+                    amount=amount.replace('-','')
                 else:
-                    ttype = 'E'
+                    if row[6][:8] == 'Transfer' or row[6][:8] == 'transfer':
+                        ttype = 'TE'
+                    else:
+                        ttype = 'E'
 
                 transaction = Transaction(id_user=current_user.id,
                                             id_budget_category=current_user.budget_categories.filter_by(category_title=row[5]).first().id,
                                             date=datetime.strptime(row[3],"%m/%d/%Y"),
-                                            amount=float(row[4].replace(',','')),
+                                            amount=float(amount),
                                             note=row[6],
                                             ttype=ttype
                                             )
