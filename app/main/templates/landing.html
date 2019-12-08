@@ -2,23 +2,23 @@
 
 {% block app_content %}
 <div class="container">
-    <h1>Welcome to Budgy!</h1>
-    <p>
-        We're currently under construction.
-    </p>
-    <br>
-    <div class="row">
-        <div class="col-md-3 bg-primary">
-            <h5>Budget Links</h5>
+    <div class="row" align="center">
+        <h1>Welcome to Budgy!</h1>
+        <p><img src="{{ url_for('static', filename='budgie-4065626_1280.png') }}" alt="The mystical budgie!" height="255" width="300"></p>
+        <p>We're currently under construction, but a number of useful features for tracking your budget have already been implemented.</p>
+        
+        <div class="col-md-3 bg-info">
+            <a href="{{ url_for('main.budget_add') }}"><h5>1. Add Budgets</h5></a>
         </div>
         <div class="col-md-1"></div>
-        <div class="col-md-3 bg-primary">
-            <h5>Transaction Links</h5>
+        <div class="col-md-3 bg-info">
+            <a href="{{ url_for('main.trans_add') }}"><h5>2. Post Transactions</h5></a>
         </div>
         <div class="col-md-1"></div>
-        <div class="col-md-3 bg-primary">
-            <h5>Visualization Links</h5>
+        <div class="col-md-3 bg-info">
+            <a href="{{ url_for('visuals.spending_by_category') }}'"><h5>3. Visualization Your Data</h5></a>
         </div>
+        <br>
     </div>
 </div>
 {% endblock %}
