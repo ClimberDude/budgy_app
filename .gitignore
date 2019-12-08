@@ -1,3 +1,5 @@
 budgy.db
 .env
 *.pyc
+.vscode/
+.idea/
