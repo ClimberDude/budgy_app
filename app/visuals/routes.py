@@ -22,7 +22,10 @@ from io import StringIO
 @login_required
 def income_v_spending():
 
-    data = da.income_v_spending_plot()
+    try:
+        data = da.income_v_spending_plot()
+    except:
+        flash('There are currently no transaction. Add some to see visualizations!')
 
     budget_categories = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()]
     spending_categories = [(c.spending_category,c.spending_category) for c in Budget_Category.query.with_entities(Budget_Category.spending_category).distinct()]
@@ -33,12 +36,15 @@ def income_v_spending():
     form.category.choices += spending_categories
 
     if form.validate_on_submit():
+        try:
+            data = da.income_v_spending_plot(start_date=form.start_date.data,
+                                end_date=form.end_date.data,
+                                budget=form.budget.data,
+                                category=form.category.data
+                                )
+        except:
+            flash('There are currently no transaction. Add some to see visualizations!')
 
-        data = da.income_v_spending_plot(start_date=form.start_date.data,
-                            end_date=form.end_date.data,
-                            budget=form.budget.data,
-                            category=form.category.data
-                            )
 
         return render_template('income_v_spending.html',
                             title='Income vs Spending',
