@@ -3,3 +3,4 @@ budgy.db
 *.pyc
 .vscode/
 .idea/
+logs/
