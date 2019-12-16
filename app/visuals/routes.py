@@ -8,8 +8,8 @@ from app.models import User, Budget_Category, Budget_History, Transaction
 from datetime import datetime
 
 from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
-from flask_login import current_user, login_required
-
+# from flask_login import current_user, login_required
+from flask_security import current_user, login_required
 from io import StringIO
 
 # @bp.route('/data_analysis', methods=['GET','POST'])

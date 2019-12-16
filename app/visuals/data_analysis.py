@@ -5,7 +5,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from flask import flash, jsonify
-from flask_login import current_user
+# from flask_login import current_user
+from flask_security import current_user
 
 from sqlalchemy.sql import func
 

@@ -61,9 +61,9 @@
 
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}
-                    <li><a href="{{ url_for('admin.login') }}">{{ 'Login' }}</a></li>
+                    <li><a href="{{ url_for('auth.login') }}">{{ 'Login' }}</a></li>
                     {% else %}
-                    <li><a href="{{ url_for('admin.logout') }}">{{ 'Logout' }}</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}">{{ 'Logout' }}</a></li>
                     {% endif %}
                 </ul>
             </div>
