@@ -60,9 +60,13 @@
                 </ul>
 
                 <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.has_role('Admin') %}
+                    <li><a href="{{ url_for('admin.index') }}">{{ 'Admin' }}</a></li>
+                    {% endif %}
                     {% if current_user.is_anonymous %}
                     <li><a href="{{ url_for('auth.login') }}">{{ 'Login' }}</a></li>
                     {% else %}
+                    <li><a href="{{ url_for('auth.profile') }}">{{ 'Profile' }}</a></li>
                     <li><a href="{{ url_for('auth.logout') }}">{{ 'Logout' }}</a></li>
                     {% endif %}
                 </ul>

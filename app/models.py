@@ -19,6 +19,11 @@ class Role(RoleMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80),unique=True)
     description = db.Column(db.String(255))
+    users = db.relationship('User',
+                        secondary=roles_users,
+                        primaryjoin=(roles_users.c.role_id == id), 
+                        backref=db.backref('role',lazy='dynamic'))
+
 
     def __str__(self):
         return self.name
@@ -37,7 +42,10 @@ class User(UserMixin, db.Model):
     budget_histories = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     transactions = db.relationship('Transaction', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     unallocated_income = db.Column(db.DECIMAL)
-    roles = db.relationship('Role',secondary=roles_users, backref=db.backref('users',lazy='dynamic'))
+    roles = db.relationship('Role',
+                            secondary=roles_users,
+                            primaryjoin=(roles_users.c.user_id == id), 
+                            backref=db.backref('user',lazy='dynamic'))
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

@@ -2,11 +2,12 @@ from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordForm, ResetPasswordRequestForm
 from app.auth.email import send_password_reset_email
-from app.models import User
+from app.models import User, Role
 from flask import render_template, redirect, url_for, flash, request
 # from flask_login import login_user, logout_user, current_user
-from flask_security import login_user, logout_user, current_user
+from flask_security import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
+
 
 @bp.route('/login', methods=['GET','POST'])
 def login():
@@ -52,7 +53,8 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data,
                     email=form.email.data,
-                    unallocated_income=0.0)
+                    unallocated_income=0.0,)
+                    # roles=)
 
         #sets password using method in user model
         user.set_password(form.password.data)
@@ -102,3 +104,10 @@ def reset_password(token):
     return render_template('reset_password.html',
                            title='Reset Password',
                            form=form)
+
+@login_required
+@bp.route('/profile', methods=['GET','POST'])
+def profile():
+    return render_template('profile.html',
+                            title='Profile',
+                            user=current_user)

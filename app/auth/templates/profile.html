@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h3><u>Profile</u></h3>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-12">
+            <table>
+                <tr>
+                    <td class="col-md-2"><img src="{{ user.avatar(128) }}"></td>
+                    <td class="col-md-10">
+                        <table>
+                            <tr>
+                                <td><p>Username:</p></td>
+                                <td><p>{{ user.username[0]|upper }}{{ user.username[1:] }}</p></td>
+                            </tr>
+                            <tr>
+                                <td><p>First Trans. Date: </p></td>
+                                <td><p>cheese</p></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-12">
+            <table id="responsive" class="display">
+                <thead>
+                    <tr>
+                        <th class="col-md-2">User Roles</th>
+                        <th class="col-md-2"># Budgets</th>
+                        <th class="col-md-2"># Transactions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {% for role in user.roles %}
+                            <p>{{ role }}</p>
+                            {% endfor %}
+                        </td>
+                        <td>{{ user.budget_categories.count() }}</td>
+                        <td>{{ user.transactions.count() }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -19,11 +19,6 @@ import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
-# class MyView(BaseView):
-#     @expose('/')
-#     def index(self):
-#         return self.render('index.html')
-
 admin = Admin(name="Budgy")
 bootstrap = Bootstrap()
 db = SQLAlchemy()
@@ -37,8 +32,6 @@ security = Security()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
-
-
 
 def create_app(config_class=Config):
     app = Flask(__name__)
