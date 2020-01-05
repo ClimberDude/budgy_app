@@ -14,12 +14,12 @@ def before_first_request():
     
     if not Role.query.filter(Role.name=='User').first():
 
-        role_user = Role(name='User', description='Standard user access priviliges')
+        role_user = Role(name='User', description='Standard user access privileges')
         db.session.add(role_user)
 
     if not Role.query.filter(Role.name=='Admin').first():
 
-        role_admin = Role(name='Admin', description='Standard user access priviliges + Admin access')
+        role_admin = Role(name='Admin', description='Standard user access privileges + Admin access')
         db.session.add(role_admin)
 
     db.session.commit()
