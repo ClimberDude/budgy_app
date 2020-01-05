@@ -1,11 +1,35 @@
 from app import db, login
 from datetime import datetime
 from flask import current_app
-from flask_login import UserMixin
+# from flask_login import UserMixin
+from flask_security import current_user, login_required, RoleMixin, Security, \
+    SQLAlchemyUserDatastore, UserMixin, utils
 from hashlib import md5
 import jwt
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
+
+roles_users = db.Table(
+    'roles_users',
+    db.Column('user_id',db.Integer(), db.ForeignKey('user.id')),
+    db.Column('role_id',db.Integer(), db.ForeignKey('role.id'))
+    )
+
+class Role(RoleMixin,db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80),unique=True)
+    description = db.Column(db.String(255))
+    users = db.relationship('User',
+                        secondary=roles_users,
+                        primaryjoin=(roles_users.c.role_id == id), 
+                        backref=db.backref('role',lazy='dynamic'))
+
+
+    def __str__(self):
+        return self.name
+
+    def __hash__(self):
+        return hash(self.name)
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
@@ -13,10 +37,15 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    active = db.Column(db.Boolean(),default=True)
     budget_categories = db.relationship('Budget_Category', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     budget_histories = db.relationship('Budget_History', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     transactions = db.relationship('Transaction', cascade='delete, delete-orphan', backref='user', lazy='dynamic')
     unallocated_income = db.Column(db.DECIMAL)
+    roles = db.relationship('Role',
+                            secondary=roles_users,
+                            primaryjoin=(roles_users.c.user_id == id), 
+                            backref=db.backref('user',lazy='dynamic'))
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -45,7 +74,6 @@ class User(UserMixin, db.Model):
         except:
             return
         return User.query.get(id)
-
 
 class Budget_Category(db.Model):
     __tablename__ = 'budget_category'

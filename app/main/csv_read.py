@@ -8,7 +8,8 @@ def import_trans_from_csv(trans_file):
     from app.models import User, Budget_Category, Budget_History, Transaction
     from datetime import datetime
     from flask import flash
-    from flask_login import current_user
+    # from flask_login import current_user
+    from flask_security import current_user
 
     transaction_reader=csv.reader(trans_file,delimiter=",")
     count = 0

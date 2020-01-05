@@ -1,16 +1,25 @@
 from config import Config
 from dotenv import load_dotenv
 from flask import Flask, request, current_app
+
+from flask_admin import Admin, BaseView, expose
+from flask_admin.contrib.sqla import ModelView
+
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_moment import Moment
+
 from flask_sqlalchemy import SQLAlchemy
+from flask_security import current_user,login_required, RoleMixin, Security, \
+                            SQLAlchemyUserDatastore, UserMixin, utils
+
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 
+admin = Admin(name="Budgy")
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 mail = Mail()
@@ -19,6 +28,7 @@ moment = Moment()
 login = LoginManager()
 login.login_view = 'admin.login'
 login.login_message = 'Please log in to access this page.'
+security = Security()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
@@ -27,6 +37,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    admin.init_app(app)
     bootstrap.init_app(app)
     db.init_app(app)
     mail.init_app(app)
@@ -34,8 +45,13 @@ def create_app(config_class=Config):
     moment.init_app(app)
     login.init_app(app)
 
-    from app.admin import bp as admin_bp
-    app.register_blueprint(admin_bp, url_prefix='/admin')
+    from app.models import User, Role    
+
+    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    security.init_app(app, user_datastore)
+
+    from app.auth import bp as auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp, url_prefix='/error')
@@ -86,4 +102,4 @@ def create_app(config_class=Config):
 
     return app
 
-from app import models
+from app import models,admin_views
