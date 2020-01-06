@@ -400,7 +400,6 @@ def trans_edit():
 
         return redirect(url_for('main.trans_edit'))
 
-
     return render_template('transactions/edit.html',
                         title='Edit Transactions',
                         form=form,

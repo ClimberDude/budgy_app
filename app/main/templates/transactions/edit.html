@@ -3,13 +3,14 @@
 
 {% block app_content %}
 <div class="container">
+    <form class="form form-horizontal" method="post" role="form">
+    {{ form.hidden_tag() }}
+    {{ wtf.form_errors(form, hiddens="only") }}
+
     <div class="row">
         <div class="col-md-4 bg-info">
         <h3><u>Edit Transactions</u></h3>
         <br><br>    
-        <form class="form form-horizontal" method="post" role="form">
-        {{ form.hidden_tag() }}
-        {{ wtf.form_errors(form, hiddens="only") }}
         
             {% for item in form if item.name != 'select_trans' and item.widget.input_type!='hidden' %}
             <div class="row">
@@ -18,14 +19,15 @@
             </div>
             <br>
             {% endfor %}
-        </form>
+        
         </div>
         <div class="col-md-8">
             <h4>Select Transaction to Edit</h4>
             <br>
-            {% include 'transactions/_select_transactions.html' %}
+            {% include 'transactions/_select_transactions.html' %}      
         </div>
     </div>
+    </form>
 </div>
 
 {% endblock %}
