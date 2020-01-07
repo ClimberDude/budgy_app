@@ -1,4 +1,4 @@
-from app import db
+from app import db, table_builder
 from app.main import bp
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
                             AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, DeleteTransactionForm, \
@@ -10,10 +10,11 @@ from app.main import csv_read
 
 from datetime import datetime
 
-from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
+from flask import render_template, flash, redirect, url_for, request, current_app
 # from flask_login import current_user, login_required
 from flask_security import current_user, login_required
 from io import StringIO
+import simplejson as json
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/landing', methods=['GET', 'POST'])
@@ -509,27 +510,28 @@ def trans_transfer():
 
 @bp.route('/test', methods=['GET','POST'])
 @login_required
-def transactions_list():        
+def transactions_list():
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
+      
+    form = DeleteTransactionForm()
+    form.select_trans.choices = trans_choices
+
+    if form.validate_on_submit():
+        flash(form.select_trans.data)
 
     return render_template('/test.html',
-                            title='Ajax Test'
+                            title='Ajax Test',
+                            form=form
                             )
 
-@bp.route('/retrieve', methods=['GET','POST'])
+@bp.route('/retrieve_view', methods=['GET','POST'])
 @login_required
-def retrieve():
-    transactions_list = current_user.transactions.all()
-    data = []
-    for transaction in transactions_list:
-        data.append({
-            "date": str(transaction.date),
-            "amount": str(transaction.amount),
-            "ttype": str(transaction.ttype),
-            "category": "",
-            "vendor": str(transaction.vendor),
-            "note": str(transaction.note)
-            })   
+def retrieve_view():
+    data = table_builder.collect_data_serverside_view(request, current_user)
+    return json.dumps(data)
 
-    trans = {"data" : data}      
-
-    return jsonify(trans)
+@bp.route('/retrieve_select', methods=['GET','POST'])
+@login_required
+def retrieve_select():
+    data = table_builder.collect_data_serverside_select(request, current_user)
+    return json.dumps(data)

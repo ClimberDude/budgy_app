@@ -93,7 +93,7 @@ class EditTransactionForm(FlaskForm):
     submit = SubmitField("Submit Trans. Edits")
 
 class DeleteTransactionForm(FlaskForm): 
-    select_trans = RadioField('Select Transaction', choices=[], validators=[DataRequired()], coerce=int)
+    select_trans = RadioField('Select Transaction', choices=[], validators=[Optional()], coerce=int)
 
     submit = SubmitField("Delete Transaction")
 
