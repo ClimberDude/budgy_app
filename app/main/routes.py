@@ -10,7 +10,7 @@ from app.main import csv_read
 
 from datetime import datetime
 
-from flask import render_template, flash, redirect, url_for, request, current_app
+from flask import render_template, flash, redirect, url_for, request, current_app, jsonify
 # from flask_login import current_user, login_required
 from flask_security import current_user, login_required
 from io import StringIO
@@ -21,7 +21,10 @@ def landing():
     return render_template('landing.html',
                             title='Landing Page')
 
-#route functions related to handling the budget categories
+###########################################################################################################################
+# Route functions related to handling the budget categories
+###########################################################################################################################
+
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
@@ -269,7 +272,10 @@ def budget_fund():
                             unallocated_income=unallocated_income
                             )
 
-#route functions related to handling transactions
+###########################################################################################################################
+# Route functions related to handling transactions
+###########################################################################################################################
+
 @bp.route('/trans/add', methods=['GET','POST'])
 @login_required
 def trans_add():
@@ -497,4 +503,33 @@ def trans_transfer():
                         budget_categories=budget_categories
                         )
 
+###########################################################################################################################
+# Route functions related to AJAX calls
+###########################################################################################################################
 
+@bp.route('/test', methods=['GET','POST'])
+@login_required
+def transactions_list():        
+
+    return render_template('/test.html',
+                            title='Ajax Test'
+                            )
+
+@bp.route('/retrieve', methods=['GET','POST'])
+@login_required
+def retrieve():
+    transactions_list = current_user.transactions.all()
+    data = []
+    for transaction in transactions_list:
+        data.append({
+            "date": str(transaction.date),
+            "amount": str(transaction.amount),
+            "ttype": str(transaction.ttype),
+            "category": "",
+            "vendor": str(transaction.vendor),
+            "note": str(transaction.note)
+            })   
+
+    trans = {"data" : data}      
+
+    return jsonify(trans)

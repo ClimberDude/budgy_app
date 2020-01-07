@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+
+<div class="table_container">
+    <table id="serverside_table" cellspacing="0">
+        <thead>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Expense Type</th>
+            <th>Category</th>
+            <th>Vendor</th>
+            <th>Note</th>
+        </thead>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
+<script>
+    $(document).ready(function () {
+        $('#serverside_table').DataTable({
+            bProcessing: true,
+            bServerSide: true,
+            sPaginationType: "full_numbers",
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            bjQueryUI: true,
+            sAjaxSource: '/tables/serverside_table',
+            columns: [
+            {"data": "Date"},
+            {"data": "Amount"},
+            {"data": "Type"},
+            {"data": "Budget Category"},
+            {"data": "Vendor"},
+            {"data": "Note"}
+            ]
+        });
+    });
+    // $('#example').DataTable( {
+    //     processing: true,
+    //     serverSide: true,
+    //     ajax: {
+    //         url: '/retrieve',
+    //         type: 'POST'
+    //     },
+    //     "columns": [
+    //         {"data": "date"},
+    //         {"data": "amount"},
+    //         {"data": "type"},
+    //         {"data": "vendor"},
+    //         {"data": "note"}
+    //     ]
+    // } );
+</script>
+{% endblock %}
