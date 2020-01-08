@@ -1,3 +1,5 @@
+from app.mod_tables.models import TableBuilder
+
 from config import Config
 from dotenv import load_dotenv
 from flask import Flask, request, current_app
@@ -29,6 +31,7 @@ login = LoginManager()
 login.login_view = 'admin.login'
 login.login_message = 'Please log in to access this page.'
 security = Security()
+table_builder = TableBuilder()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))

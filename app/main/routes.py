@@ -1,4 +1,4 @@
-from app import db
+from app import db, table_builder
 from app.main import bp
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
                             AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, DeleteTransactionForm, \
@@ -14,6 +14,7 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 # from flask_login import current_user, login_required
 from flask_security import current_user, login_required
 from io import StringIO
+import simplejson as json
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/landing', methods=['GET', 'POST'])
@@ -21,7 +22,10 @@ def landing():
     return render_template('landing.html',
                             title='Landing Page')
 
-#route functions related to handling the budget categories
+###########################################################################################################################
+# Route functions related to handling the budget categories
+###########################################################################################################################
+
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
@@ -231,6 +235,7 @@ def budget_fund():
     for budget in form.fund_budgets:
         budget.name = form_categories[i][0]
         budget.label = form_categories[i][1]
+        budget.data['fund_value'] = 1
         i += 1
 
     if form.validate_on_submit():
@@ -269,7 +274,10 @@ def budget_fund():
                             unallocated_income=unallocated_income
                             )
 
-#route functions related to handling transactions
+###########################################################################################################################
+# Route functions related to handling transactions
+###########################################################################################################################
+
 @bp.route('/trans/add', methods=['GET','POST'])
 @login_required
 def trans_add():
@@ -496,4 +504,46 @@ def trans_transfer():
                         budget_categories=budget_categories
                         )
 
+###########################################################################################################################
+# Route functions related to AJAX calls
+###########################################################################################################################
 
+# @bp.route('/test', methods=['GET','POST'])
+# @login_required
+# def transactions_list():
+#     trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
+      
+#     form = DeleteTransactionForm()
+#     form.select_trans.choices = trans_choices
+
+#     if form.validate_on_submit():
+#         flash(form.select_trans.data)
+
+#     return render_template('/test.html',
+#                             title='Ajax Test',
+#                             form=form
+#                             )
+
+@bp.route('/retr_trans_view', methods=['GET','POST'])
+@login_required
+def retr_trans_view():
+    data = table_builder.collect_data_serverside_trans_view(request, current_user)
+    return json.dumps(data)
+
+@bp.route('/retr_trans_select', methods=['GET','POST'])
+@login_required
+def retr_trans_select():
+    data = table_builder.collect_data_serverside_trans_select(request, current_user)
+    return json.dumps(data)
+
+@bp.route('/retr_budget_view', methods=['GET','POST'])
+@login_required
+def retr_budget_view():
+    data = table_builder.collect_data_serverside_budget_view(request, current_user)
+    return json.dumps(data)
+
+@bp.route('/retr_budget_select', methods=['GET','POST'])
+@login_required
+def retr_budget_select():
+    data = table_builder.collect_data_serverside_budget_select(request, current_user)
+    return json.dumps(data)

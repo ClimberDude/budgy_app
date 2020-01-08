@@ -52,6 +52,10 @@
             <h4>Current Budget Data</h4>
             <br>
             <table id="responsive" class="display">
+            <!-- TODO: figure out how to use the new serverside tables with 
+                    the funding sheet. -->
+            <!-- <table id="serverside_table" class="display" cellspacing="0"> -->
+
                 <thead>
                     <tr>
                         <th>Add to Balance</th>
@@ -85,21 +89,36 @@
     </div>
     </form>
 </div>
+<body>
+    <script>
+        function sumEntries() {
+            var prev_entry = Number({{ unallocated_income|safe }})
+            var entry = Number(document.querySelector("#entry").value)
 
-<script>
-    function sumEntries() {
-        var prev_entry = Number({{ unallocated_income|safe }})
-        var entry = Number(document.querySelector("#entry").value)
+            var values = document.querySelectorAll("#fund");
+            
+            var sum = 0;
+            for ( var i = 0; i < values.length; i++) {   
+                sum += Number(values[i].value);
+            }
 
-        var values = document.querySelectorAll("#fund");
-        
-        var sum = 0;
-        for ( var i = 0; i < values.length; i++) {   
-            sum += Number(values[i].value);
+            document.getElementById("remainder").innerHTML = prev_entry + entry - sum
+
         }
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
+    <!-- <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/budget_fund.js') }}"></script> -->
+    <script>
+        $(document).ready( function () {
+            $('#responsive').DataTable({
+                paging: false,
 
-        document.getElementById("remainder").innerHTML = prev_entry + entry - sum
+            });
 
-    }
-</script>
+        } );
+    </script>    
+</body>
+
 {% endblock %}

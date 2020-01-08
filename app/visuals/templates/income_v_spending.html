@@ -27,8 +27,16 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='Chart.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='chartjs-plugin-colorschemes.min.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   
+    <script src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chartjs-plugin-colorschemes.min.js') }}"></script>
+     
+    <!-- CDN
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-colorschemes"></script>
+     -->
+     
     <script>
         var label = {{ data['label'] | tojson }}
         var labels = {{ data['labels'] | safe }}
