@@ -27,49 +27,10 @@
 {% endblock %}
 
 {% block scripts %}
+
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
-<script>
-    $(document).ready(function () {
-        $('#serverside_table').DataTable({
-            bProcessing: true,
-            bServerSide: true,
-            sPaginationType: "full_numbers",
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            bjQueryUI: true,
-            sAjaxSource: '/retrieve_select',
-            order: [[1, 'desc']],
-            columns: [
-            {"data": "Select"},
-            {"data": "Date"},
-            {"data": "Amount"},
-            {"data": "Type"},
-            {"data": "Budget Category"},
-            {"data": "Vendor"},
-            {"data": "Note"}
-            ],
-            columnDefs:[
-            { 
-                targets: 0,
-                searchable: false,
-                orderable: false,
-                render: function(data, type, full, meta){
-                   if(type === 'display'){
-                      data = '<input id="select_trans" name="select_trans" type="radio" value="' + data + '">';      
-                   }
-                   return data;
-                }
-            },{
-                targets: 2,
-                searchable: true,
-                orderable: true,
-                render: function(data, type, full, meta){
-                   return '$ '+data.toFixed(2);
-                }
-            }
-        ]
-        });
-    });
-</script>
+<script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/trans_select.js') }}"></script>  
+
 {% endblock %}

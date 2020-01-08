@@ -80,7 +80,7 @@ class AddBatchTransactionForm(FlaskForm):
 
 
 class EditTransactionForm(FlaskForm):
-    select_trans = RadioField('Select Transaction', choices=[], validators=[DataRequired()], coerce=int)
+    select_trans = RadioField('Select Transaction', choices=[], validators=[Optional()], coerce=int)
 
     trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
     trans_amount = DecimalField('Amount',validators=[Optional()])

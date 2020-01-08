@@ -235,6 +235,7 @@ def budget_fund():
     for budget in form.fund_budgets:
         budget.name = form_categories[i][0]
         budget.label = form_categories[i][1]
+        budget.data['fund_value'] = 1
         i += 1
 
     if form.validate_on_submit():
@@ -508,30 +509,42 @@ def trans_transfer():
 # Route functions related to AJAX calls
 ###########################################################################################################################
 
-@bp.route('/test', methods=['GET','POST'])
-@login_required
-def transactions_list():
-    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
+# @bp.route('/test', methods=['GET','POST'])
+# @login_required
+# def transactions_list():
+#     trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
       
-    form = DeleteTransactionForm()
-    form.select_trans.choices = trans_choices
+#     form = DeleteTransactionForm()
+#     form.select_trans.choices = trans_choices
 
-    if form.validate_on_submit():
-        flash(form.select_trans.data)
+#     if form.validate_on_submit():
+#         flash(form.select_trans.data)
 
-    return render_template('/test.html',
-                            title='Ajax Test',
-                            form=form
-                            )
+#     return render_template('/test.html',
+#                             title='Ajax Test',
+#                             form=form
+#                             )
 
-@bp.route('/retrieve_view', methods=['GET','POST'])
+@bp.route('/retr_trans_view', methods=['GET','POST'])
 @login_required
-def retrieve_view():
-    data = table_builder.collect_data_serverside_view(request, current_user)
+def retr_trans_view():
+    data = table_builder.collect_data_serverside_trans_view(request, current_user)
     return json.dumps(data)
 
-@bp.route('/retrieve_select', methods=['GET','POST'])
+@bp.route('/retr_trans_select', methods=['GET','POST'])
 @login_required
-def retrieve_select():
-    data = table_builder.collect_data_serverside_select(request, current_user)
+def retr_trans_select():
+    data = table_builder.collect_data_serverside_trans_select(request, current_user)
+    return json.dumps(data)
+
+@bp.route('/retr_budget_view', methods=['GET','POST'])
+@login_required
+def retr_budget_view():
+    data = table_builder.collect_data_serverside_budget_view(request, current_user)
+    return json.dumps(data)
+
+@bp.route('/retr_budget_select', methods=['GET','POST'])
+@login_required
+def retr_budget_select():
+    data = table_builder.collect_data_serverside_budget_select(request, current_user)
     return json.dumps(data)

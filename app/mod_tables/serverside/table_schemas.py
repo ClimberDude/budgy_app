@@ -1,4 +1,4 @@
-SERVERSIDE_TABLE_COLUMNS_SELECT = [
+SERVERSIDE_TABLE_COLUMNS_TRANS_SELECT = [
     {
         "data_name": "id",
         "column_name": "Select",
@@ -50,7 +50,7 @@ SERVERSIDE_TABLE_COLUMNS_SELECT = [
     }
 ]
 
-SERVERSIDE_TABLE_COLUMNS_VIEW = [
+SERVERSIDE_TABLE_COLUMNS_TRANS_VIEW = [
     {
         "data_name": "date",
         "column_name": "Date",
@@ -91,6 +91,75 @@ SERVERSIDE_TABLE_COLUMNS_VIEW = [
         "column_name": "Note",
         "default": "",
         "order": 6,
+        "searchable": True
+    }
+]
+
+SERVERSIDE_TABLE_COLUMNS_BUDGET_SELECT = [
+    {
+        "data_name": "id",
+        "column_name": "Select",
+        "default": 1,
+        "order": 1,
+        "searchable": False
+    },
+    {
+        "data_name": "category_title",
+        "column_name": "Category Title",
+        "default": "",
+        "order": 2,
+        "searchable": True
+    },
+    {
+        "data_name": "spending_category",
+        "column_name": "Spending Category",
+        "default": "",
+        "order": 3,
+        "searchable": True
+    },
+    {
+        "data_name": "annual_budget",
+        "column_name": "Annual Budget",
+        "default": 0.00,
+        "order": 4,
+        "searchable": True
+    },
+    {
+        "data_name": "current_balance",
+        "column_name": "Current Balance",
+        "default": 0.00,
+        "order": 5,
+        "searchable": True
+    }
+]
+
+SERVERSIDE_TABLE_COLUMNS_BUDGET_VIEW = [
+    {
+        "data_name": "category_title",
+        "column_name": "Category Title",
+        "default": "",
+        "order": 1,
+        "searchable": True
+    },
+    {
+        "data_name": "spending_category",
+        "column_name": "Spending Category",
+        "default": "",
+        "order": 2,
+        "searchable": True
+    },
+    {
+        "data_name": "annual_budget",
+        "column_name": "Annual Budget",
+        "default": 0.00,
+        "order": 3,
+        "searchable": True
+    },
+    {
+        "data_name": "current_balance",
+        "column_name": "Current Balance",
+        "default": 0.00,
+        "order": 4,
         "searchable": True
     }
 ]

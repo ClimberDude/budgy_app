@@ -65,9 +65,6 @@ def create_app(config_class=Config):
     from app.visuals import bp as visuals_bp
     app.register_blueprint(visuals_bp, url_prefix='/visuals')
 
-    from app.mod_tables.controllers import tables
-    app.register_blueprint(tables)
-
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
             auth = None
