@@ -18,7 +18,6 @@
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav mr-auto">
-                    <li><a href="{{ url_for('main.landing') }}">{{ 'Home' }}</a></li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a id="dropdown01" class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
