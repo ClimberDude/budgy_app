@@ -1,24 +1,44 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<div class="container">
-    <div class="row" align="center">
-        <h1>Welcome to Budgy!</h1>
-        <p><img src="{{ url_for('static', filename='budgie-4065626_1280.png') }}" alt="The mystical budgie!" height="255" width="300"></p>
-        <p>We're currently under construction, but a number of useful features for tracking your budget have already been implemented.</p>
-        
-        <div class="col-md-3 bg-info">
-            <a href="{{ url_for('main.budget_add') }}"><h5>1. Add Budgets</h5></a>
-        </div>
-        <div class="col-md-1"></div>
-        <div class="col-md-3 bg-info">
-            <a href="{{ url_for('main.trans_add') }}"><h5>2. Post Transactions</h5></a>
-        </div>
-        <div class="col-md-1"></div>
-        <div class="col-md-3 bg-info">
-            <a href="{{ url_for('visuals.income_v_spending') }}"><h5>3. Visualization Your Data</h5></a>
-        </div>
+<br>
+<div class="container-fluid">
+    <div class="container mx-auto text-center">
+            <h1 class="display-3">Welcome to Budgy!</h1>
+            <br>
+            <img src="{{ url_for('static', filename='budgie-4065626_1280.png') }}" alt="The mystical budgie!" height="255" width="300">
+            <br>
+            <p>We're currently under construction, but a number of useful features for tracking your budget have already been implemented.</p>
+    </div>
+</div>
+<br>
+<div class="container-fluid">
+    <div class="row"></div>
+    <div class="row">
         <br>
+        <div class="col-md-4 bg-light mx-auto text-center">
+            <div class="container-fluid">
+                <h5>1. Add Budgets</h5>
+                <p>Add a budget category and allot a budgetary target. </p>
+                <p><a class="btn btn-secondary" href="{{ url_for('main.budget_add') }}" role="button">View details »</a></p>
+            </div>
+        </div>
+        <div class="col-md-4 bg-light mx-auto text-center">
+            <div class="container-fluid">
+                <h5>2. Post Transactions</h5>
+                <p>Enter transactions against your budgets and keep track of your current balance.  </p>
+                <a class="btn btn-secondary" href="{{ url_for('main.trans_add') }}" role="button">View details »</a>
+            </div>
+        </div>
+        <div class="col-md-4 bg-light mx-auto text-center">
+            <div class="container-fluid">
+                <h5>3. Visualize Your Data</h5>
+                <p>Add a budget category and allot a budgetary target. </p>
+                <a class="btn btn-secondary" href="{{ url_for('visuals.income_v_spending') }}" role="button">View details »</a>
+            </div>
+        </div>
+        <div class="row"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
