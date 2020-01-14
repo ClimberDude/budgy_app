@@ -28,7 +28,7 @@ mail = Mail()
 migrate = Migrate(compare_type=True)
 moment = Moment()
 login = LoginManager()
-login.login_view = 'admin.login'
+login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page.'
 security = Security()
 table_builder = TableBuilder()
@@ -48,11 +48,6 @@ def create_app(config_class=Config):
     moment.init_app(app)
     login.init_app(app)
 
-    from app.models import User, Role    
-
-    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-    security.init_app(app, user_datastore)
-
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
@@ -65,6 +60,11 @@ def create_app(config_class=Config):
     from app.visuals import bp as visuals_bp
     app.register_blueprint(visuals_bp, url_prefix='/visuals')
 
+    from app.models import User, Role
+    from app.auth.forms import LoginForm 
+    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    security.init_app(app, datastore=user_datastore,login_form=LoginForm)
+    
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
             auth = None
