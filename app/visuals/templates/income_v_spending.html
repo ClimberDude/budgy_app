@@ -2,10 +2,11 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
+<br>
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Change Spending Plot Variables</u></h3>
+        <div class="col-md-4 bg-dark text-white">
+            <h4>Change Spending Plot Variables</h3>
             <br><br>
             <form class="form form-horizontal" method="post" role="form">
             {{ form.hidden_tag() }}
@@ -23,12 +24,11 @@
         </div>
 
         <div class="col-md-8">
-            <canvas id="myChart" width="400" height="300"></canvas>
+            <canvas id="myChart" width="400" height="400"></canvas>
         </div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-   
     <script src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chartjs-plugin-colorschemes.min.js') }}"></script>
      
@@ -38,10 +38,10 @@
      -->
      
     <script>
-        var label = {{ data['label'] | tojson }}
-        var labels = {{ data['labels'] | safe }}
-        var expenses = {{ data['data_expenses'] | safe }}
-        var income = {{ data['data_income'] | safe }}
+        var label = {{ data['label'] | tojson }};
+        var labels = {{ data['labels'] | safe }};
+        var expenses = {{ data['data_expenses'] | safe }};
+        var income = {{ data['data_income'] | safe }};
 
         var ctx = document.getElementById('myChart').getContext('2d');
         var myChart = new Chart(ctx, {

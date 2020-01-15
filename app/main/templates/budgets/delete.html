@@ -2,19 +2,19 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-
-<div class="container">
+<br>
+<div class="container-fluid">
     <form class="form form-horizontal" method="post" role="form">
     {{ form.hidden_tag() }}
     {{ wtf.form_errors(form, hiddens="only") }} 
     
     <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Delete or End Budget Category</u></h3>
+        <div class="col-md-4 bg-dark text-white">
+            <h4>Delete or End Budget Category</h4>
             <br>
             <div class="row">
                 <div class="col-md-12">
-                    <h4>Delete or End the Budget?</h4>
+                    <h5>Delete or End the Budget?</h5>
                 </div>
             </div>
             <div class="row">

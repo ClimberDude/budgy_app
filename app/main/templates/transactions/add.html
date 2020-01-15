@@ -2,13 +2,13 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
-        
+<br>
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Add a Transaction</u></h3>
-            <br><br>
-
+        <div class="col-md-4 bg-dark text-white">
+            <h4>Add a Transaction</h4>
+            <br>
+            <br>
             <form class="form form-horizontal" method="post" role="form">
             {{ form.hidden_tag() }}
             {{ wtf.form_errors(form, hiddens="only") }}

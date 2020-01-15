@@ -2,14 +2,15 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
+<br>
+<div class="container-fluid">
     <form class="form form-horizontal" method="post" role="form">
     {{ form.hidden_tag() }}
     {{ wtf.form_errors(form, hiddens="only") }}
 
     <div class="row">
-        <div class="col-md-4 bg-info">
-            <h3><u>Fund Budget Categories</u></h3>
+        <div class="col-md-4 bg-dark text-white">
+            <h4>Fund Budget Categories</h4>
             <br><br>
             <div class="row">
                 <div class="col-md-4">
@@ -50,7 +51,6 @@
         </div>
         <div class="col-md-8">
             <h4>Current Budget Data</h4>
-            <br>
             <table id="responsive" class="display">
             <!-- TODO: figure out how to use the new serverside tables with 
                     the funding sheet. -->
@@ -114,9 +114,8 @@
         $(document).ready( function () {
             $('#responsive').DataTable({
                 paging: false,
-
+                searching: false,
             });
-
         } );
     </script>    
 </body>

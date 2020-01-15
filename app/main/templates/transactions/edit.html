@@ -2,13 +2,14 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block app_content %}
-<div class="container">
+<br>
+<div class="container-fluid">
     <form class="form form-horizontal" method="post" role="form">
     {{ form.hidden_tag() }}
     {{ wtf.form_errors(form, hiddens="only") }}
     <div class="row">
-        <div class="col-md-4 bg-info">
-        <h3><u>Edit Transactions</u></h3>
+        <div class="col-md-4 bg-dark text-white">
+        <h4>Edit Transactions</h4>
         <br><br>    
         
             {% for item in form if item.name != 'select_trans' and item.widget.input_type!='hidden' %}
