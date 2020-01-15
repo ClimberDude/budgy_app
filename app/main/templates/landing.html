@@ -14,38 +14,66 @@
 <br>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-4 bg-light mx-auto text-center">
-            <h5>1. Add Budgets</h5>
+        <div class="col-md-4 bg-light">
+            <div class="container">
+                <div class="row ">
+                    <div class="col-md-12 mx-auto text-center">
+                        <h5>1. Add Budgets</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <p>Add a budget category and allot a budgetary target.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <a class="btn btn-secondary" href="{{ url_for('main.budget_add') }}" role="button">View details »</a>
+                    </div>
+                </div>
+                <br>
+            </div>
         </div>
-        <div class="col-md-4 bg-light mx-auto text-center">
-            <h5>2. Post Transactions</h5>
+        <div class="col-md-4 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <h5>2. Post Transactions</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <p>Enter transactions against your budgets and keep track of your current balance.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <a class="btn btn-secondary" href="{{ url_for('main.trans_add') }}" role="button">View details »</a>
+                    </div>
+                </div>
+                <br>
+            </div>
         </div>
-        <div class="col-md-4 bg-light mx-auto text-center">
-            <h5>3. Visualize Your Data</h5>
-        </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 bg-light mx-auto text-center">                
-            <p>Add a budget category and allot a budgetary target.</p>
-        </div>
-        <div class="col-md-4 bg-light mx-auto text-center">
-            <p>Enter transactions against your budgets and keep track of your current balance.</p>
-        </div>
-        <div class="col-md-4 bg-light mx-auto text-center">    
-            <p>Add a budget category and allot a budgetary target.</p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 bg-light mx-auto text-center">
-            <a class="btn btn-secondary" href="{{ url_for('main.budget_add') }}" role="button">View details »</a></p>
-        </div>
-        <div class="col-md-4 bg-light mx-auto text-center">    
-            <a class="btn btn-secondary" href="{{ url_for('main.trans_add') }}" role="button">View details »</a>
-        </div>
-        <div class="col-md-4 bg-light mx-auto text-center">    
-            <a class="btn btn-secondary" href="{{ url_for('visuals.income_v_spending') }}" role="button">View details »</a>
-        </div>
+
+        <div class="col-md-4 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <h5>3. Visualize Your Data</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <p>Add a budget category and allot a budgetary target.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mx-auto text-center">
+                        <a class="btn btn-secondary" href="{{ url_for('visuals.income_v_spending') }}" role="button">View details »</a>
+                    </div>
+                </div>
+            </div>
+        </div>       
     </div>
 </div>
 {% endblock %}
