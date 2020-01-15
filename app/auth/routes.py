@@ -1,6 +1,6 @@
 from app import db
 from app.auth import bp
-from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordForm, ResetPasswordRequestForm
+from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordForm, ResetPasswordRequestForm, DownloadForm
 from app.auth.email import send_password_reset_email
 from app.models import User, Role, Transaction
 from flask import render_template, redirect, url_for, flash, request
@@ -110,7 +110,19 @@ def reset_password(token):
 def profile():
     transactions = current_user.transactions
     date = transactions.order_by(Transaction.date.asc()).first().date
+
+    form = DownloadForm()
+
+    if form.validate_on_submit():
+        if form.select_data.data == 1:
+            return redirect(url_for('main.download_budgets'))
+
+        if form.select_data.data == 2:
+            return redirect(url_for('main.download_trans'))
+
     return render_template('profile.html',
                             title='Profile',
                             user=current_user,
-                            date=date)
+                            date=date,
+                            form=form
+                            )

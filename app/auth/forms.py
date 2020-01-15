@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms import StringField, PasswordField, BooleanField, SubmitField,  RadioField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional
 from app.models import User
 
 
@@ -43,3 +43,8 @@ class ResetPasswordForm(FlaskForm):
         'Repeat Password', validators=[DataRequired(),
                                            EqualTo('password')])
     submit = SubmitField('Request Password Reset')
+
+class DownloadForm(FlaskForm):
+    select_data = RadioField('Select Transaction', choices=[(1,'Budget Data'),(2,'Transaction Data')], validators=[Optional()], coerce=int)    
+    submit = SubmitField('Export Data')
+

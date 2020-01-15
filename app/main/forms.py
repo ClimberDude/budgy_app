@@ -59,6 +59,8 @@ class FundingForm(FlaskForm):
     fund_budgets = FieldList(FormField(FundBudgetEntryForm),validators=[Optional()],min_entries=1)
     submit = SubmitField("Submit Funding Allotments")
 
+class DownloadBudgetForm(FlaskForm):
+    download = SubmitField("Download Budget Data")
 
 ############################################
 #Forms for manipulating Transaction objects#
@@ -102,3 +104,6 @@ class TransferForm(FlaskForm):
     to_category = SelectField('To Category',validators=[DataRequired()],choices=[(0,'- Select Category -')],default=0,coerce=int)
     trans_amount = DecimalField('Amount',validators=[DataRequired()])
     submit = SubmitField("Submit Transfer")
+
+class DownloadTransactionForm(FlaskForm):
+    download = SubmitField("Download Transactions")

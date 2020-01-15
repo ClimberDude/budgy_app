@@ -5,8 +5,17 @@
 <br>
 <div class="container-fluid">
     <div class="row bg-dark text-white">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <h4>View Transactions</h4>
+        </div>
+        <div class="col-md-6 ml-auto text-right">
+            <form class="form form-horizontal" method="post" role="form">
+            {{ form.hidden_tag() }}
+            {{ wtf.form_errors(form, hiddens="only") }}
+
+            {{ form.download(class_="btn btn-outline-danger") }}
+
+            </form>
         </div>
     </div>
     <br>

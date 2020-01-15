@@ -29,6 +29,24 @@
                         <p>{{ date }}</p>
                     </div>                    
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>Export Data: </p>
+                    </div>                    
+                </div>
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10">
+                        <form class="form form-horizontal" method="post" role="form">
+                            {{ form.hidden_tag() }}
+                            {{ wtf.form_errors(form, hiddens="only") }}
+
+                            {{ wtf.quick_form(form) }}
+                
+                        </form>                    
+                    </div>                    
+                </div>
+                <br>
             </div>
         </div>
         <div class="col-md-8">

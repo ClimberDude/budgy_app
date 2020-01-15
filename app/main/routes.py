@@ -2,11 +2,11 @@ from app import db, table_builder
 from app.main import bp
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
                             AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, DeleteTransactionForm, \
-                            TransferForm, FundingForm
+                            TransferForm, FundingForm, DownloadTransactionForm, DownloadBudgetForm
 
 from app.models import User, Budget_Category, Budget_History, Transaction
 
-from app.main import csv_read
+from app.main import csv_rw
 
 from datetime import datetime
 
@@ -68,7 +68,7 @@ def budget_add():
         try:
             if form_batch.budget_csv_file.data:
                 file = form_batch.budget_csv_file.data.read().decode('utf-8')
-                csv_read.import_budgets_from_csv(StringIO(file))
+                csv_rw.import_budgets_from_csv(StringIO(file))
                 return redirect(url_for('main.budget_add'))
         except:
             flash('There was an error processing your csv file.')    
@@ -216,10 +216,16 @@ def budget_delete():
 @login_required
 def budget_view():
     budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
+        
+    form=DownloadBudgetForm()
+
+    if form.validate_on_submit():
+        return redirect(url_for('main.download_budgets'))
 
     return render_template('budgets/view.html',
                             title='View Budgets',
                             budget_categories=budget_categories,
+                            form=form
                             )
 
 @bp.route('/budget/fund', methods=['GET','POST'])
@@ -293,7 +299,7 @@ def trans_add():
         try:
             if form_batch.trans_csv_file.data:
                 file = form_batch.trans_csv_file.data.read().decode('utf-8')
-                csv_read.import_trans_from_csv(StringIO(file))
+                csv_rw.import_trans_from_csv(StringIO(file))
                 return redirect(url_for('main.trans_add'))
 
         except:
@@ -447,10 +453,15 @@ def trans_delete():
 @login_required
 def trans_view():
     transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+    form = DownloadTransactionForm()
+
+    if form.validate_on_submit():
+        return redirect(url_for('main.download_trans'))
 
     return render_template('transactions/view.html',
                             title='View Transactions',
-                            transactions=transactions
+                            transactions=transactions,
+                            form=form
                             )
 
 @bp.route('/trans/transfer',methods=['GET','POST'])
@@ -508,22 +519,6 @@ def trans_transfer():
 # Route functions related to AJAX calls
 ###########################################################################################################################
 
-# @bp.route('/test', methods=['GET','POST'])
-# @login_required
-# def transactions_list():
-#     trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
-      
-#     form = DeleteTransactionForm()
-#     form.select_trans.choices = trans_choices
-
-#     if form.validate_on_submit():
-#         flash(form.select_trans.data)
-
-#     return render_template('/test.html',
-#                             title='Ajax Test',
-#                             form=form
-#                             )
-
 @bp.route('/retr_trans_view', methods=['GET','POST'])
 @login_required
 def retr_trans_view():
@@ -547,3 +542,23 @@ def retr_budget_view():
 def retr_budget_select():
     data = table_builder.collect_data_serverside_budget_select(request, current_user)
     return json.dumps(data)
+
+@bp.route('/download_trans',methods=['GET','POST'])
+@login_required
+def download_trans():
+    try:
+        output = csv_rw.export_trans_to_csv()
+        return output
+    except:
+        flash('There was an error downloading your transactions','error')
+        return redirect(url_for('main.trans_view'))
+
+@bp.route('/download_budgets',methods=['GET','POST'])
+@login_required
+def download_budgets():
+    try:
+        output = csv_rw.export_budget_to_csv()
+        return output
+    except:
+        flash('There was an error downloading your transactions','error')
+        return redirect(url_for('main.budget_view'))
