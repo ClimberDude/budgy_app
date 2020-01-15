@@ -2,7 +2,7 @@ from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordForm, ResetPasswordRequestForm
 from app.auth.email import send_password_reset_email
-from app.models import User, Role
+from app.models import User, Role, Transaction
 from flask import render_template, redirect, url_for, flash, request
 # from flask_login import login_user, logout_user, current_user
 from flask_security import login_user, logout_user, current_user, login_required
@@ -108,6 +108,9 @@ def reset_password(token):
 @login_required
 @bp.route('/profile', methods=['GET','POST'])
 def profile():
+    transactions = current_user.transactions
+    date = transactions.order_by(Transaction.date.asc()).first().date
     return render_template('profile.html',
                             title='Profile',
-                            user=current_user)
+                            user=current_user,
+                            date=date)
