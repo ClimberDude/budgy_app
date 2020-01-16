@@ -385,7 +385,7 @@ def trans_edit():
             if form.trans_vendor.data == transaction.vendor:
                 flash("The new vendor you've entered matches the existing vendor.")
             else:
-                transaction.vendor = form.trans_vendor.data.title()
+                transaction.vendor = form.trans_vendor.data.capitalize()
                 db.session.commit()
                 flash_note += [4]
 
@@ -393,7 +393,7 @@ def trans_edit():
             if form.trans_note.data == transaction.note:
                 flash("The new note you've entered matches the existing note.")
             else:
-                transaction.note = form.trans_note.data.capitalize()
+                transaction.note = form.trans_note.data
                 db.session.commit()
                 flash_note += [5]
 
@@ -516,7 +516,7 @@ def trans_transfer():
                         )
 
 ###########################################################################################################################
-# Route functions related to AJAX calls
+# Route functions related to AJAX & file download calls
 ###########################################################################################################################
 
 @bp.route('/retr_trans_view', methods=['GET','POST'])
