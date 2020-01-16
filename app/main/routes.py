@@ -316,8 +316,8 @@ def trans_add():
                                     id_budget_category = form.trans_category.data,
                                     date = form.trans_date.data,
                                     amount = form.trans_amount.data,
-                                    vendor = form.trans_vendor.data.title(),
-                                    note = form.trans_note.data.capitalize(),
+                                    vendor = form.trans_vendor.data.capitalize(),
+                                    note = form.trans_note.data,
                                     ttype = form.trans_type.data)
         
         db.session.add(transaction)
