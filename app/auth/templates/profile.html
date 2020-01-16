@@ -24,7 +24,8 @@
                 <div class="row">
                     <div class="col-md-6">
                         <p>First Trans. Date: </p>
-                    </div>                    
+                    </div> 
+                {% if date != 'No transactions entered yet!' %}                   
                     <div class="col-md-6">
                         <p>{{ date }}</p>
                     </div>                    
@@ -46,6 +47,12 @@
                         </form>                    
                     </div>                    
                 </div>
+                {% else %}
+                    <div class="col-md-6">
+                        <p>{{ date }}</p>
+                    </div>                    
+                </div>
+                {% endif %}
                 <br>
             </div>
         </div>

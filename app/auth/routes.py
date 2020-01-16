@@ -1,4 +1,4 @@
-from app import db
+from app import db, security
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordForm, ResetPasswordRequestForm, DownloadForm
 from app.auth.email import send_password_reset_email
@@ -58,7 +58,10 @@ def register():
 
         #sets password using method in user model
         user.set_password(form.password.data)
-
+        
+        role = Role.query.filter(Role.name == 'User').first() #queries the admin role
+        
+        security.datastore.add_role_to_user(user,role)
         db.session.add(user)
         db.session.commit()
 
@@ -109,7 +112,12 @@ def reset_password(token):
 @bp.route('/profile', methods=['GET','POST'])
 def profile():
     transactions = current_user.transactions
-    date = transactions.order_by(Transaction.date.asc()).first().date
+    #TODO: need to add better quality to this fix. Should have more resolution 
+    # if there are/are not budgets as well. 
+    try:
+        date = transactions.order_by(Transaction.date.asc()).first().date
+    except:
+        date = "No transactions entered yet!"
 
     form = DownloadForm()
 
