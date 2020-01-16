@@ -316,7 +316,7 @@ def trans_add():
                                     id_budget_category = form.trans_category.data,
                                     date = form.trans_date.data,
                                     amount = form.trans_amount.data,
-                                    vendor = form.trans_vendor.data.capitalize(),
+                                    vendor = form.trans_vendor.data,
                                     note = form.trans_note.data,
                                     ttype = form.trans_type.data)
         
@@ -385,7 +385,7 @@ def trans_edit():
             if form.trans_vendor.data == transaction.vendor:
                 flash("The new vendor you've entered matches the existing vendor.")
             else:
-                transaction.vendor = form.trans_vendor.data.capitalize()
+                transaction.vendor = form.trans_vendor.data
                 db.session.commit()
                 flash_note += [4]
 
