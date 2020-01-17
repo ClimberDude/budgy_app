@@ -1,12 +1,10 @@
-from app import db, table_builder
-from app.main import bp
+from app import db, table_builder, scheduled_tasks
+from app.main import bp, csv_rw
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
-                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, DeleteTransactionForm, \
+                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, EditRepTransactionForm, DeleteTransactionForm, \
                             TransferForm, FundingForm, DownloadTransactionForm, DownloadBudgetForm
 
-from app.models import User, Budget_Category, Budget_History, Transaction
-
-from app.main import csv_rw
+from app.models import User, Budget_Category, Budget_History, Transaction, Scheduled_Transaction
 
 from datetime import datetime
 
@@ -323,9 +321,17 @@ def trans_add():
         db.session.add(transaction)
         db.session.commit()
 
-        transaction.apply_transaction()
-
-        flash("Your transaction has been added.")
+        if form.trans_sched.data:
+            sched_trans_template = 
+            st = scheduled_tasks.add_repeating_trans(transaction)
+            if form.trans_sched_apply.data:
+                transaction.apply_transaction()
+                flash("Your transaction has been applied, and will repeat day {} of each month.".format(st.dotm))
+            if not form.trans_sched_apply.data:
+                flash("Your transaction has NOT been applied, but will be applied on day {} of each month going forward.".format(st.dotm))
+        else:
+            transaction.apply_transaction()
+            flash("Your transaction has been applied.")        
         
         return redirect(url_for('main.trans_add'))
 
@@ -419,6 +425,26 @@ def trans_edit():
                         form=form,
                         transactions=transactions,
                         )
+
+@bp.route('/trans/edit_rep', methods=['GET','POST'])
+@login_required
+def trans_edit_rep():
+    trans_choices = [(c.id,c.dotm) for c in current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()]
+    transactions = current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()
+    
+    budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+
+    form=EditRepTransactionForm()
+    form.select_trans.choices = trans_choices
+    form.trans_category.choices += budget_choices
+
+    
+    return render_template('transactions/edit_rep.html',
+                    title='Edit Repeating Transactions',
+                    form=form,
+                    transactions=transactions,
+                    )
+
 
 @bp.route('/trans/delete', methods=['GET','POST'])
 @login_required

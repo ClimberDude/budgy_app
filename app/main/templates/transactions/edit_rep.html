@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+<br>
+<div class="container-fluid">
+    <form class="form form-horizontal" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        <div class="row">
+            <div class="col-md-4 bg-dark text-white">
+            <h4>Edit Transactions</h4>
+            <br><br>    
+            
+                {% for item in form if item.name != 'select_trans' and item.widget.input_type!='hidden' %}
+                <div class="row">
+                    <div class="col-md-5">{{ item.label }}</div>
+                    <div class="col-md-7">{{ item(style="width: 100%;") }}</div> 
+                </div>
+                <br>
+                {% endfor %}
+            
+            </div>
+            <div class="col-md-8">            
+                {% include 'transactions/_select_rep_transactions.html' %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<body>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
+    <!-- <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/budget_fund.js') }}"></script> -->
+    <script>
+        $(document).ready( function () {
+            $('#responsive').DataTable({
+                paging: false,
+                searching: false,
+            });
+        } );
+    </script>  
+</body>
+{% endblock %}

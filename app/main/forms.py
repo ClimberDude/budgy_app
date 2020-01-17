@@ -74,6 +74,8 @@ class AddTransactionForm(FlaskForm):
     trans_category = SelectField('Budget Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
     trans_vendor = StringField('Vendor',validators=[Optional()])
     trans_note = StringField('Note',validators=[Optional()])
+    trans_sched = BooleanField('Repeat Monthly?',validators=[Optional()])
+    trans_sched_apply = BooleanField('Apply today?',validators=[Optional()])
     submit = SubmitField("Submit Transaction")
 
 class AddBatchTransactionForm(FlaskForm):
@@ -82,6 +84,19 @@ class AddBatchTransactionForm(FlaskForm):
 
 
 class EditTransactionForm(FlaskForm):
+    select_trans = RadioField('Select Transaction', choices=[], validators=[Optional()], coerce=int)
+
+    trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
+    trans_amount = DecimalField('Amount',validators=[Optional()])
+    trans_type = SelectField('Type',validators=[Optional()],choices=[('S','- Select Type -'),('E','Expense'),('I','Income')], coerce=str, default=None)
+    # TODO: figure out form validation with SelectField
+    trans_category = SelectField('Budget Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
+    trans_vendor = StringField('Vendor',validators=[Optional()])
+    trans_note = StringField('Note',validators=[Optional()])
+
+    submit = SubmitField("Submit Trans. Edits")
+
+class EditRepTransactionForm(FlaskForm):
     select_trans = RadioField('Select Transaction', choices=[], validators=[Optional()], coerce=int)
 
     trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
