@@ -1,0 +1,44 @@
+<div class="table_container">
+    <table id="responsive" class="display" cellspacing="0">
+        <thead>
+            <tr>
+                <th class="col-md-1">Select
+                    {% for error in form.select_trans.errors %}
+                    <span style="color: red; width: 100%;">{{ error }}</span>
+                    {% endfor %}        
+                </th>
+                <th class="col-md-1">DOTM</th>
+                <th class="col-md-1">Amount</th>
+                <th class="col-md-1">Type</th>
+                <th class="col-md-3">Budget Category</th>
+                <th class="col-md-2">Vendor</th>
+            </tr>
+        </thead>
+        <tbody>  
+            {% for option in form.select_trans %}
+            <tr>
+                <th scope='row'>{{ option }}</td>
+                {% for trans in transactions if trans.id == option.data %}
+                <td>{{ trans.dotm }}</td>
+                <td>{{ "$%.2f"|format(trans.transaction.amount) }}</td>
+                {% if trans.transaction.ttype == 'SE' %}
+                <td>Expense</td>
+                {% elif trans.transaction.ttype == 'SI' %}
+                <td>Income</td>
+                {% elif trans.transaction.ttype[0] == 'T' %}
+                <td>Transfer</td>
+                {% endif %}
+                <td>{{ trans.transaction.budget_category.category_title }}</td>
+                <td>{{ trans.transaction.vendor }}</td>
+            {% endfor %}       
+            </tr>  
+            {% endfor %}     
+        </tbody>
+    </table >
+    <!-- <body>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/trans_select.js') }}"></script>  
+    </body> -->
+</div>

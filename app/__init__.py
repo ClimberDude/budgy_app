@@ -74,6 +74,7 @@ def create_app(config_class=Config):
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, datastore=user_datastore,login_form=LoginForm)
 
+    table_builder = TableBuilder()
 
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:

@@ -1,7 +1,7 @@
-from app import db, table_builder, scheduled_tasks
-from app.main import bp, csv_rw
+from app import db, table_builder
+from app.main import bp, csv_rw, scheduled_tasks
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
-                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, EditRepTransactionForm, DeleteTransactionForm, \
+                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, EditSchedTransactionForm, DeleteTransactionForm, \
                             TransferForm, FundingForm, DownloadTransactionForm, DownloadBudgetForm
 
 from app.models import User, Budget_Category, Budget_History, Transaction, Scheduled_Transaction
@@ -318,18 +318,44 @@ def trans_add():
                                     note = form.trans_note.data,
                                     ttype = form.trans_type.data)
         
-        db.session.add(transaction)
-        db.session.commit()
 
         if form.trans_sched.data:
-            sched_trans_template = 
-            st = scheduled_tasks.add_repeating_trans(transaction)
+            #if the transaction is requested to repeat monthly:
+            #create a template transaction for the scheduled transaction. 
+            #this template is not applied.
+            sched_trans_template = transaction
+
+            if transaction.ttype == 'I':
+                sched_trans_template.ttype = 'SI'
+            elif transaction.ttype == 'E':
+                sched_trans_template.ttype = 'SE'
+
+            sched_trans_template.note = 'Scheduled transaction template - not applied to budget'
+
+            db.session.add(sched_trans_template)
+            db.session.commit()
+
+            #add a repeating transaction based on the scheduled transaction template
+            st = scheduled_tasks.add_scheduled_trans(sched_trans_template)
+
             if form.trans_sched_apply.data:
+                #if requested, apply the transaction immediately
+                #note, this is the original transaction, not the scheduled transaction template
+                db.session.add(transaction)
+                db.session.commit()
+
                 transaction.apply_transaction()
                 flash("Your transaction has been applied, and will repeat day {} of each month.".format(st.dotm))
+
             if not form.trans_sched_apply.data:
+                #if immediate application is not requested, no further commit necessary
                 flash("Your transaction has NOT been applied, but will be applied on day {} of each month going forward.".format(st.dotm))
         else:
+            #if the transaction is not requested to repeat monthly, simply apply the current
+            #transaction. 
+            db.session.add(transaction)
+            db.session.commit()
+
             transaction.apply_transaction()
             flash("Your transaction has been applied.")        
         
@@ -345,8 +371,8 @@ def trans_add():
 @bp.route('/trans/edit', methods=['GET','POST'])
 @login_required
 def trans_edit():
-    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
-    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.filter(Transaction.ttype != 'ST').order_by(Transaction.date.desc()).all()]
+    transactions = current_user.transactions.filter(Transaction.ttype != 'ST').order_by(Transaction.date.desc()).all()
     
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
@@ -357,6 +383,8 @@ def trans_edit():
     if form.validate_on_submit():
         transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
         flash_note = []
+
+        # TODO: add delete functionality to the edit page. No need for a separate page. 
 
         if form.trans_date.data:
             if form.trans_date.data == transaction.date:
@@ -426,21 +454,105 @@ def trans_edit():
                         transactions=transactions,
                         )
 
-@bp.route('/trans/edit_rep', methods=['GET','POST'])
+@bp.route('/trans/edit_sched', methods=['GET','POST'])
 @login_required
-def trans_edit_rep():
+def trans_edit_sched():
     trans_choices = [(c.id,c.dotm) for c in current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()]
     transactions = current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()
     
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
-    form=EditRepTransactionForm()
+    form=EditSchedTransactionForm()
     form.select_trans.choices = trans_choices
     form.trans_category.choices += budget_choices
 
+    if form.validate_on_submit():
+        #identify the schedule item selected
+        for trans in transactions:
+            if form.select_trans.data == trans.id:  
+                break
+       
+        #identify the scheduled transaction template associated with the scheduled transaction id
+        trans_template = current_user.transactions.filter_by(id=trans.id_transaction).first()
+
+        flash_note = []
+
+        if form.trans_delete.data:
+            #delete both the scheduled transaction item and it's template transaction
+            db.session.delete(trans_template)
+            db.session.delete(trans)
+            db.session.commit()
+            flash('The selected transaction has been deleted.')
+
+            return redirect(url_for('main.trans_edit_sched'))
+
+        if form.trans_dotm.data:
+            if form.trans_dotm.data == trans.dotm:
+                flash("The new date you've entered matches the existing date.")
+            else:
+                trans.dotm = form.trans_dotm.data.day
+                db.session.commit()
+                flash_note += [0]
+
+        if form.trans_amount.data:
+            if form.trans_amount.data == trans_template.amount:
+                flash("The new amount you've entered matches the existing amount.")
+            else:
+                #no need to use the trans functions, because the changes here are not to
+                #be applied to a budget immediately. These are only changes to the template.
+                trans_template.amount = form.trans_amount.data
+                flash_note += [1]
+
+        if form.trans_type.data != 'S':
+            if form.trans_type.data == trans_template.ttype:
+                flash("The new type you've entered matches the existing type.")
+            else:
+                trans_template.ttype = form.trans_type.data
+                flash_note += [2]
+
+        if form.trans_category.data != 0:
+            if form.trans_category.data == trans_template.id_budget_category:
+                flash("The new category you've entered matches the existing category.")
+            else:
+                trans_template.id_budget_category = form.trans_category.data
+                flash_note += [3]
+
+        if form.trans_vendor.data:
+            if form.trans_vendor.data == trans_template.vendor:
+                flash("The new vendor you've entered matches the existing vendor.")
+            else:
+                trans_template.vendor = form.trans_vendor.data
+                flash_note += [4]
+
+        if form.trans_note.data:
+            if form.trans_note.data == trans_template.note:
+                flash("The new note you've entered matches the existing note.")
+            else:
+                trans_template.note = form.trans_note.data
+                flash_note += [5]
+
+        db.session.commit()
+
+        if 0 in flash_note:
+            flash("The scheduled transaction date has been changed.")
+        if 1 in flash_note:
+            flash("The scheduled transaction amount has been changed.")
+        if 2 in flash_note:
+            flash("The scheduled transaction type has been changed.")
+        if 3 in flash_note:
+            flash("The scheduled transaction budget category has been changed.")
+        if 4 in flash_note:
+            flash("The scheduled transaction vendor has been changed.")
+        if 5 in flash_note:
+            flash("The scheduled transaction note has been changed.")
+
+        return redirect(url_for('main.trans_edit_sched'))
+
+
+
     
-    return render_template('transactions/edit_rep.html',
-                    title='Edit Repeating Transactions',
+    return render_template('transactions/edit_sched.html',
+                    title='Edit Scheduled Transactions',
                     form=form,
                     transactions=transactions,
                     )
@@ -451,8 +563,8 @@ def trans_edit_rep():
 def trans_delete():
     # TODO: ended budget categories still have transactions visible. Is this a bug or a feature? The whole point of 
     #   allowing budgets to be ended rather than deleted was to retain the historical data on spending. 
-    trans_choices = [(c.id,c.amount) for c in current_user.transactions.order_by(Transaction.date.desc()).all()]
-    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+    trans_choices = [(c.id,c.amount) for c in current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()]
+    transactions = current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()
 
     form = DeleteTransactionForm()
 

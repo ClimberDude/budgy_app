@@ -1,5 +1,6 @@
 from app.mod_tables.serverside.serverside_table import ServerSideTable
 from app.mod_tables.serverside import table_schemas
+from flask import current_app
  
 class TableBuilder(object):
     #####################################################################################
@@ -7,41 +8,48 @@ class TableBuilder(object):
     #####################################################################################
 
     def collect_data_serverside_trans_view(self, request, user):
-        transactions_list = user.transactions.all()
-        budget_list = user.budget_categories
-        data = []
-        for transaction in transactions_list:
-            category = budget_list.filter_by(id = transaction.id_budget_category).first()
-            data.append({
-                "date": str(transaction.date),
-                "amount": transaction.amount,
-                "ttype": transaction.ttype,
-                "category": category.category_title,
-                "vendor": transaction.vendor,
-                "note": transaction.note
-                })  
+        with current_app.app_context():
+            from app.models import Transaction
+            #Do not display repeating transaction templates. 
+            transactions_list = user.transactions.filter(Transaction.ttype != 'SE' or Transaction.ttype != 'SI').all()
+            budget_list = user.budget_categories
+            data = []
+            for transaction in transactions_list:
+                category = budget_list.filter_by(id = transaction.id_budget_category).first()
+                data.append({
+                    "date": str(transaction.date),
+                    "amount": transaction.amount,
+                    "ttype": transaction.ttype,
+                    "category": category.category_title,
+                    "vendor": transaction.vendor,
+                    "note": transaction.note
+                    })  
 
-        columns = table_schemas.SERVERSIDE_TABLE_COLUMNS_TRANS_VIEW
-        return ServerSideTable(request, data, columns).output_result()
+            columns = table_schemas.SERVERSIDE_TABLE_COLUMNS_TRANS_VIEW
+            return ServerSideTable(request, data, columns).output_result()
 
     def collect_data_serverside_trans_select(self, request, user):
-        transactions_list = user.transactions.all()
-        budget_list = user.budget_categories
-        data = []
-        for transaction in transactions_list:
-            category = budget_list.filter_by(id = transaction.id_budget_category).first()
-            data.append({
-                "id": transaction.id,
-                "date": str(transaction.date),
-                "amount": transaction.amount,
-                "ttype": transaction.ttype,
-                "category": category.category_title,
-                "vendor": transaction.vendor,
-                "note": transaction.note
-                })  
+        with current_app.app_context():
+            from app.models import Transaction
+            #Do not display repeating transaction templates. 
+            transactions_list = user.transactions.filter(Transaction.ttype != 'SE' or Transaction.ttype != 'SI').all()
+            budget_list = user.budget_categories
+            data = []
 
-        columns = table_schemas.SERVERSIDE_TABLE_COLUMNS_TRANS_SELECT
-        return ServerSideTable(request, data, columns).output_result()
+            for transaction in transactions_list:
+                category = budget_list.filter_by(id = transaction.id_budget_category).first()
+                data.append({
+                    "id": transaction.id,
+                    "date": str(transaction.date),
+                    "amount": transaction.amount,
+                    "ttype": transaction.ttype,
+                    "category": category.category_title,
+                    "vendor": transaction.vendor,
+                    "note": transaction.note
+                    })  
+
+            columns = table_schemas.SERVERSIDE_TABLE_COLUMNS_TRANS_SELECT
+            return ServerSideTable(request, data, columns).output_result()
 
     #####################################################################################
     # Table constructors for budget data
