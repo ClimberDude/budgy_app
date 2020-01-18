@@ -1,4 +1,4 @@
-from app import create_app, db
+from app import create_app, db, scheduler
 from app.models import User, Role
 
 app = create_app()
@@ -6,7 +6,10 @@ app = create_app()
 @app.shell_context_processor
 def make_shell_context():
     return {'db':db,
-            'User':User}
+            'User':User,
+            'Role':Role,
+            'scheduler':scheduler
+            }
 
 @app.before_first_request
 def before_first_request():

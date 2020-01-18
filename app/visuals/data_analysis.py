@@ -8,6 +8,8 @@ from flask import flash, jsonify
 # from flask_login import current_user
 from flask_security import current_user
 
+import numpy as np
+
 from sqlalchemy.sql import func
 
 def income_v_spending_plot(**kwargs):
@@ -83,26 +85,33 @@ def spending_by_category_plot(**kwargs):
         end_date = datetime.now().date()
     transactions = transactions.filter(Transaction.date <= end_date)
 
-    data = {'label':'Spending by Category',
-        'labels':[],
-        'data_expenses':[],
-        'data_income':[]
-        }
+    data = {'label':'Spending by Category'}
+
+    labels = np.array([])
+    data_expenses = np.array([])
 
     if budget_or_spending == 0: #Separate by Budget Categories
         
         for budget_categ in current_user.budget_categories.filter_by(status="A").all():
             budget_trans = transactions.filter(Budget_Category.category_title == budget_categ.category_title)
             budget_expense_sum = budget_trans.with_entities(func.sum(Transaction.amount).label("Budget Sum")).filter(Transaction.ttype == "E")
-            data['labels'].append(budget_categ.category_title)
-            data['data_expenses'].append(float(budget_expense_sum.scalar() if budget_expense_sum.scalar() != None else 0))
+            labels = np.append(labels,budget_categ.category_title)
+            data_expenses = np.append(data_expenses, float(budget_expense_sum.scalar() if budget_expense_sum.scalar() != None else 0))
 
     elif budget_or_spending == 1: #Separate by Spending Categories
         
         for spending_categ in  db.session.query(Budget_Category.spending_category).filter(Budget_Category.id_user==current_user.id).distinct().all():
             spending_trans = transactions.filter(Budget_Category.spending_category == spending_categ[0])
             spending_expense_sum = spending_trans.with_entities(func.sum(Transaction.amount).label("Spending Sum")).filter(Transaction.ttype == "E")
-            data['labels'].append(spending_categ[0])
-            data['data_expenses'].append(float(spending_expense_sum.scalar() if spending_expense_sum.scalar() != None else 0))
+            labels = np.append(labels,spending_categ[0])
+            data_expenses = np.append(data_expenses,float(spending_expense_sum.scalar() if spending_expense_sum.scalar() != None else 0))
+
+    idx = np.argsort(data_expenses)
+
+    labels = labels[idx]
+    data_expenses = data_expenses[idx]
+
+    data['labels'] = labels.tolist()
+    data['data_expenses'] = data_expenses.tolist()
 
     return data
