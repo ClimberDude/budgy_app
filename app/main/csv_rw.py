@@ -1,114 +1,112 @@
 # TODO: update the import form to include transactions formatted 
 #   as they are in the exported csv files
 
+import csv
+from app import db
+from app.models import User, Budget_Category, Budget_History, Transaction
+from datetime import datetime
+from decimal import Decimal
+from flask import flash
+# from flask_login import current_user
+from flask_security import current_user
+
+two_places = Decimal(10) ** -2
+
 def import_trans_from_csv(trans_file):
 
-    import csv
-    from app import db
-    from app.models import User, Budget_Category, Budget_History, Transaction
-    from datetime import datetime
-    from flask import flash
-    # from flask_login import current_user
-    from flask_security import current_user
-
+    budget_categories = current_user.budget_categories
     transaction_reader=csv.reader(trans_file,delimiter=",")
     count = 0
     for row in transaction_reader:
         if row[0] != 'Transactions' and row[0] != '':
-            if row[5] != "Take Home Pay":
-                amount = row[4].replace(',','')
-                if float(amount) < 0:
-                    if row[6][:8] == 'Transfer' or row[6][:8] == 'transfer':
-                        ttype = 'TI'
-                    else:
-                        ttype = 'I'
+            user_id = current_user.id
+            budget_id = budget_categories.filter_by(category_title=row[4]).first().id
+            date = datetime.strptime(row[1],"%Y-%m-%d")
+            amount = Decimal(row[2]).quantize(two_places)
+            vendor = row[5]
+            note = row[6]
+            ttype = row[3]
 
-                    amount=amount.replace('-','')
-                else:
-                    if row[6][:8] == 'Transfer' or row[6][:8] == 'transfer':
-                        ttype = 'TE'
-                    else:
-                        ttype = 'E'
+            transaction = Transaction(id_user=user_id,
+                            id_budget_category=budget_id,
+                            date=date,
+                            amount=amount,
+                            note=note,
+                            ttype=ttype
+                            )
 
-                transaction = Transaction(id_user=current_user.id,
-                                            id_budget_category=current_user.budget_categories.filter_by(category_title=row[5]).first().id,
-                                            date=datetime.strptime(row[3],"%m/%d/%Y"),
-                                            amount=float(amount),
-                                            note=row[6],
-                                            ttype=ttype
-                                            )
+            db.session.add(transaction)
+            db.session.commit()
 
-                db.session.add(transaction)
-                db.session.commit()
-
-                transaction.apply_transaction()
-                count+=1
+            count+=1
 
     flash("{} transactions have been added".format(count))
 
 def import_budgets_from_csv(budget_file):
 
-    import csv
-    from app import db
-    from app.models import User, Budget_Category, Budget_History, Transaction
-    from datetime import datetime
-    from flask import flash
-    from flask_login import current_user
-
+    budget_categories = current_user.budget_categories
     budget_reader=csv.reader(budget_file,delimiter=",")
-    count = [0,0,0]
+    count = 0
     for row in budget_reader:
+        if row[0] != 'Budgets' and row[0] != '':
 
-        if row[0] == 'Budgets':
-            year=row[1]
-            budget_date = row[1]+'-01-01'
-        
-        elif row[0] != 'Budgets' and row[0] != '':
-            budget_category = current_user.budget_categories.filter_by(category_title=row[1]).first()
-            if row[4] == '':
-                row[4] = 0.0
+            user_id = current_user.id
+            category_title = str(row[1])
+            spending_category = row[2]
+            current_balance = Decimal(row[3]).quantize(two_places)
+            status_cat = row[4]
 
-            if budget_category:
-                count[2] += 1
-            else:
-                budget_category = Budget_Category(id_user=current_user.id,
-                                                category_title=row[1],
-                                                spending_category=row[2],
-                                                current_balance=round(float(row[4]),2),
-                                                status='A'
-                                                )
+            if not budget_categories.filter_by(category_title=category_title).first():
+
+                budget_category = Budget_Category(id_user=user_id,
+                                    category_title=category_title,
+                                    spending_category=spending_category,
+                                    current_balance=current_balance,
+                                    status=status_cat
+                                    )
 
                 db.session.add(budget_category)
                 db.session.commit()
+                count+=1
+
+                if status_cat == 'A':
+                    hist_final_startdate = row[-2]
+                elif status_cat == 'C':
+                    hist_final_startdate = row[-3]
+                hist_place = 6
+
+                while row[hist_place] != hist_final_startdate:
+                    start_datetime = datetime.strptime(row[hist_place].split('.')[0],"%Y-%m-%d %H:%M:%S")
+                    end_datetime = datetime.strptime(row[hist_place+1].split('.')[0],"%Y-%m-%d %H:%M:%S")
+                    annual_budget = Decimal(row[hist_place-1]).quantize(two_places)
+                    status_hist = 'O'
+
+                    budget_history = Budget_History(id_user=current_user.id,
+                                    id_budget_category=budget_category.id,
+                                    start_datetime=start_datetime,
+                                    end_datetime=end_datetime,
+                                    status = status_hist,
+                                    annual_budget=annual_budget)
+
+                    db.session.add(budget_history)
+                    db.session.commit()
+
+                    hist_place+=3
+
+                start_datetime = datetime.strptime(row[hist_place].split('.')[0],"%Y-%m-%d %H:%M:%S")
+                annual_budget = Decimal(row[hist_place-1]).quantize(two_places)
+                status_hist = 'C'
 
                 budget_history = Budget_History(id_user=current_user.id,
-                                                id_budget_category=budget_category.id,
-                                                start_datetime=datetime.strptime(budget_date,"%Y-%m-%d"),
-                                                status = 'C',
-                                                annual_budget=round(float(row[3]),2)*12)
+                                id_budget_category=budget_category.id,
+                                start_datetime=start_datetime,
+                                status = status_hist,
+                                annual_budget=annual_budget)
 
                 db.session.add(budget_history)
                 db.session.commit()
-                count[0] += 1
 
-            for i in range(12):
-                if row[i+5]:
-                    fund_date = year +"-{}-01".format(i+1)
-
-                    transaction = Transaction(id_user = current_user.id,
-                                id_budget_category = budget_category.id,
-                                date=datetime.strptime(fund_date,"%Y-%m-%d"),
-                                amount = row[i+5],
-                                vendor = None,
-                                note = "Allocated by batch funding.",
-                                ttype = "I")
-                    db.session.add(transaction)
-                    db.session.commit()
-
-                    transaction.apply_transaction()
-                    count[1] += 1
-
-    flash("{} budgets have been created, {} budgets already existed, with {} income transactions applied.".format(count[0],count[2],count[1]))
+    flash("{} budgets have been created.".format(count))
 
 # Exporting transactions to the user as a properly formatted CSV file. 
 
