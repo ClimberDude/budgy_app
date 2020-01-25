@@ -9,18 +9,17 @@ class TableBuilder(object):
 
     def collect_data_serverside_trans_view(self, request, user):
         with current_app.app_context():
-            from app.models import Transaction
+            from app import db
+            from app.models import User, Budget_Category, Budget_History, Transaction
             #Do not display repeating transaction templates. 
-            transactions_list = user.transactions.filter(Transaction.ttype != 'SE' or Transaction.ttype != 'SI').all()
-            budget_list = user.budget_categories
+            transactions_list = db.session.query(Transaction).filter(Transaction.id_user == user.id).filter(Transaction.ttype != 'SE' or Transaction.ttype != 'SI').all()
             data = []
             for transaction in transactions_list:
-                category = budget_list.filter_by(id = transaction.id_budget_category).first()
                 data.append({
                     "date": str(transaction.date),
                     "amount": transaction.amount,
                     "ttype": transaction.ttype,
-                    "category": category.category_title,
+                    "category": transaction.budget_category.category_title,
                     "vendor": transaction.vendor,
                     "note": transaction.note
                     })  
@@ -30,20 +29,19 @@ class TableBuilder(object):
 
     def collect_data_serverside_trans_select(self, request, user):
         with current_app.app_context():
-            from app.models import Transaction
+            from app import db
+            from app.models import User, Budget_Category, Budget_History, Transaction
             #Do not display repeating transaction templates. 
-            transactions_list = user.transactions.filter(Transaction.ttype != 'SE' or Transaction.ttype != 'SI').all()
-            budget_list = user.budget_categories
+            transactions_list = db.session.query(Transaction).filter(Transaction.id_user == user.id).filter(Transaction.ttype != 'SE' or Transaction.ttype != 'SI').all()
             data = []
 
             for transaction in transactions_list:
-                category = budget_list.filter_by(id = transaction.id_budget_category).first()
                 data.append({
                     "id": transaction.id,
                     "date": str(transaction.date),
                     "amount": transaction.amount,
                     "ttype": transaction.ttype,
-                    "category": category.category_title,
+                    "category": transaction.budget_category.category_title,
                     "vendor": transaction.vendor,
                     "note": transaction.note
                     })  
@@ -56,34 +54,36 @@ class TableBuilder(object):
     #####################################################################################
 
     def collect_data_serverside_budget_view(self, request, user):
-        budget_list = user.budget_categories.all()
-        history_list = user.budget_histories.filter_by(status = 'C')
-        data = []
-        for budget in budget_list:
-            history = history_list.filter_by(id_budget_category = budget.id).first()
-            data.append({
-                "category_title": budget.category_title,
-                "spending_category": budget.spending_category,
-                "annual_budget": history.annual_budget,
-                "current_balance": budget.current_balance
-                })  
+        with current_app.app_context():
+            from app import db
+            from app.models import User, Budget_Category, Budget_History, Transaction
+            history_list = db.session.query(Budget_History).filter(Budget_History.id_user == user.id).filter_by(status='C').all()
+            data = []
+            for history in history_list:
+                data.append({
+                    "category_title": history.budget_category.category_title,
+                    "spending_category": history.budget_category.spending_category,
+                    "annual_budget": history.annual_budget,
+                    "current_balance": history.budget_category.current_balance
+                    })  
 
         columns = table_schemas.SERVERSIDE_TABLE_COLUMNS_BUDGET_VIEW
         return ServerSideTable(request, data, columns).output_result()
 
     def collect_data_serverside_budget_select(self, request, user):
-        budget_list = user.budget_categories.all()
-        history_list = user.budget_histories.filter_by(status = 'C')
-        data = []
-        for budget in budget_list:
-            history = history_list.filter_by(id_budget_category = budget.id).first()
-            data.append({
-                "id": budget.id,
-                "category_title": budget.category_title,
-                "spending_category": budget.spending_category,
-                "annual_budget": history.annual_budget,
-                "current_balance": budget.current_balance
-                })  
+        with current_app.app_context():
+            from app import db
+            from app.models import User, Budget_Category, Budget_History, Transaction
+            history_list = db.session.query(Budget_History).filter(Budget_History.id_user == user.id).filter_by(status='C').all()
+            data = []
+            for history in history_list:
+                data.append({
+                    "id": history.budget_category.id,
+                    "category_title": history.budget_category.category_title,
+                    "spending_category": history.budget_category.spending_category,
+                    "annual_budget": history.annual_budget,
+                    "current_balance": history.budget_category.current_balance
+                    })  
 
         columns = table_schemas.SERVERSIDE_TABLE_COLUMNS_BUDGET_SELECT
         return ServerSideTable(request, data, columns).output_result()

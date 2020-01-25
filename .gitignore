@@ -1,8 +1,11 @@
 budgy.db
 .env
 *.pyc
+.vscode
 .vscode/*
-.idea/
-logs/
-.vscode/settings.json
-.vscode/settings.json
+.idea
+.idea/*
+logs
+logs/*
+venv
+venv/*
