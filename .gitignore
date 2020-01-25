@@ -2,7 +2,7 @@ budgy.db
 .env
 *.pyc
 .vscode/*
+.vscode/settings.json
 .idea/
 logs/
-.vscode/settings.json
-.vscode/settings.json
+venv/*
