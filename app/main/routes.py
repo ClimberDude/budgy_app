@@ -323,14 +323,17 @@ def trans_add():
             #if the transaction is requested to repeat monthly:
             #create a template transaction for the scheduled transaction. 
             #this template is not applied.
-            sched_trans_template = transaction
+            sched_trans_template = Transaction(id_user = current_user.id,
+                                                id_budget_category = form.trans_category.data,
+                                                date = form.trans_date.data,
+                                                amount = form.trans_amount.data,
+                                                vendor = form.trans_vendor.data,
+                                                note = 'Scheduled transaction template - not applied to budget')
 
             if transaction.ttype == 'I':
                 sched_trans_template.ttype = 'SI'
             elif transaction.ttype == 'E':
                 sched_trans_template.ttype = 'SE'
-
-            sched_trans_template.note = 'Scheduled transaction template - not applied to budget'
 
             db.session.add(sched_trans_template)
             db.session.commit()
