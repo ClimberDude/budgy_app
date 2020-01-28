@@ -65,10 +65,11 @@
                         <th class="col-md-3">Current Balance</th>
                     </tr>
                 </thead>
-                <tbody>  
+                <tbody>
                     {% for form in form.fund_budgets %}
+                    {% if form.name != "fund_budgets-0"  %}
                     {{ form.hidden_tag() }}
-        
+
                     <tr>
                         {% for item in form if item.widget.input_type!='hidden'%}
                         <th scope="row">{{ item(**{"oninput":"sumEntries()"}) }}</th>
@@ -79,9 +80,10 @@
                             {% for history in category.budget_history if history.status == 'C' %}
                         <td>{{ "$%.2f"|format(history.annual_budget) }}</td>
                             {% endfor %}
-                        <td>{{ "$%.2f"|format(category.current_balance) }}</td>       
+                        <td>{{ "$%.2f"|format(category.current_balance) }}</td>
                         {% endfor %}
-                    </tr>    
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table >
@@ -96,9 +98,9 @@
             var entry = Number(document.querySelector("#entry").value)
 
             var values = document.querySelectorAll("#fund");
-            
+
             var sum = 0;
-            for ( var i = 0; i < values.length; i++) {   
+            for ( var i = 0; i < values.length; i++) {
                 sum += Number(values[i].value);
             }
 
@@ -108,7 +110,7 @@
     </script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
     <!-- <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/budget_fund.js') }}"></script> -->
     <script>
         $(document).ready( function () {
@@ -117,7 +119,7 @@
                 searching: false,
             });
         } );
-    </script>    
+    </script>
 </body>
 
 {% endblock %}

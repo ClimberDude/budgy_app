@@ -19,13 +19,13 @@ $(document).ready(function () {
         {"data": "Vendor"},
         {"data": "Note"}
         ],
-        columnDefs:[{ 
+        columnDefs:[{
             targets: 0,
             searchable: false,
             orderable: false,
             render: function(data, type, full, meta){
                if(type === 'display'){
-                  data = '<input id="select_trans" name="select_trans" type="radio" value="' + data + '">';      
+                  data = '<input id="select_trans" name="select_trans" type="radio" value="' + data + '">';
                }
                return data;
             }
