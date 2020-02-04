@@ -27,7 +27,7 @@ def landing():
 @bp.route('/budget/add', methods=['GET', 'POST'])
 @login_required
 def budget_add():
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
+    # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     form=AddBudgetForm()
     form_batch=AddBatchBudgetForm()
@@ -76,22 +76,23 @@ def budget_add():
                            title='Add Budget',
                            form=form,
                            form_batch=form_batch,
-                           budget_categories=budget_categories)
+                           # budget_categories=budget_categories
+                           )
 
 @bp.route('/budget/edit', methods=['GET', 'POST'])
 @login_required
 def budget_edit():
     #Populate the list of radio button choices with the current list of
     #budget categories
-    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+    # radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
+    # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     #Instantiate the form
     form = EditBudgetForm()
     #Pass dynamic radio button data to the form
-    form.select_budget.choices = radio_choices
+    # form.select_budget.choices = radio_choices
 
     #If the form passes the built in validators, move on
     if form.validate_on_submit():
@@ -161,23 +162,24 @@ def budget_edit():
     return render_template('budgets/edit.html',
                             title='Edit Budget',
                            form=form,
-                           budget_categories=budget_categories)
+                           # budget_categories=budget_categories
+                           )
 
 @bp.route('/budget/delete', methods=['GET','POST'])
 @login_required
 def budget_delete():
     #Populate the list of radio button choices with the current list of
     #budget categories
-    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+    # radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
+    # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     #Instantiate the form
     form = DeleteBudgetForm()
 
     #Pass dynamic radio button data to the form
-    form.select_budget.choices = radio_choices
+    # form.select_budget.choices = radio_choices
 
     if form.validate_on_submit():
         #Identify the category to be edited by pulling the data from the radio selection
@@ -208,12 +210,13 @@ def budget_delete():
     return render_template('budgets/delete.html',
                             title='Delete/End Budget',
                             form=form,
-                            budget_categories=budget_categories)
+                            # budget_categories=budget_categories
+                            )
 
 @bp.route('/budget/view', methods=['GET','POST'])
 @login_required
 def budget_view():
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
+    # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
         
     form=DownloadBudgetForm()
 
@@ -222,25 +225,30 @@ def budget_view():
 
     return render_template('budgets/view.html',
                             title='View Budgets',
-                            budget_categories=budget_categories,
+                            # budget_categories=budget_categories,
                             form=form
                             )
 
 @bp.route('/budget/fund', methods=['GET','POST'])
 @login_required
 def budget_fund():
-    form_categories = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc())]
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
     unallocated_income = current_user.unallocated_income
+    form_categories = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc())]
+    if form_categories:
 
-    form = FundingForm(fund_budgets=form_categories)
+        budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title.asc()).all()
 
-    i=0
-    for budget in form.fund_budgets:
-        budget.name = form_categories[i][0]
-        budget.label = form_categories[i][1]
-        budget.data['fund_value'] = 1
-        i += 1
+        form = FundingForm(fund_budgets=form_categories)
+
+        i=0
+        for budget in form.fund_budgets:
+            budget.name = form_categories[i][0]
+            budget.label = form_categories[i][1]
+            budget.data['fund_value'] = 1
+            i += 1
+
+    else:
+        form = FundingForm(fund_budgets = None)
 
     if form.validate_on_submit():
         fund_sum = 0
@@ -258,7 +266,7 @@ def budget_fund():
 
                 transaction.apply_transaction()
                 flash("{} was allocated ${:.2f}".format(transaction.budget_category.category_title,transaction.amount))
-        
+
         if form.unallocated_income.data:
             unallocated_income = unallocated_income + form.unallocated_income.data - fund_sum
         else:
@@ -286,7 +294,7 @@ def budget_fund():
 @login_required
 def trans_add():
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
+    # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     form = AddTransactionForm()
     form.trans_category.choices += budget_choices
@@ -301,8 +309,8 @@ def trans_add():
                 return redirect(url_for('main.trans_add'))
 
         except:
-            flash('There was an error processing your csv file.')    
-        
+            flash('There was an error processing your csv file.')
+
         return redirect(url_for('main.trans_add'))
 
     if form.validate_on_submit():
@@ -355,31 +363,31 @@ def trans_add():
                 flash("Your transaction has NOT been applied, but will be applied on day {} of each month going forward.".format(st.dotm))
         else:
             #if the transaction is not requested to repeat monthly, simply apply the current
-            #transaction. 
+            #transaction
             db.session.add(transaction)
             db.session.commit()
 
             transaction.apply_transaction()
-            flash("Your transaction has been applied.")        
-        
+            flash("Your transaction has been applied.")
+
         return redirect(url_for('main.trans_add'))
 
     return render_template('transactions/add.html',
                             title='Add Transactions',
                             form=form,
                             form_batch=form_batch,
-                            budget_categories=budget_categories,
+                            # budget_categories=budget_categories,
                             )
 
 @bp.route('/trans/edit', methods=['GET','POST'])
 @login_required
 def trans_edit():
     trans_choices = [(c.id,c.amount) for c in current_user.transactions.filter(Transaction.ttype != 'ST').order_by(Transaction.date.desc()).all()]
-    transactions = current_user.transactions.filter(Transaction.ttype != 'ST').order_by(Transaction.date.desc()).all()
-    
+    # transactions = current_user.transactions.filter(Transaction.ttype != 'ST').order_by(Transaction.date.desc()).all()
+
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
-    form = EditTransactionForm() 
+    form = EditTransactionForm()
     form.select_trans.choices = trans_choices
     form.trans_category.choices += budget_choices
 
@@ -387,7 +395,7 @@ def trans_edit():
         transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
         flash_note = []
 
-        # TODO: add delete functionality to the edit page. No need for a separate page. 
+        # TODO: add delete functionality to the edit page. No need for a separate page.
 
         if form.trans_date.data:
             if form.trans_date.data == transaction.date:
@@ -454,15 +462,15 @@ def trans_edit():
     return render_template('transactions/edit.html',
                         title='Edit Transactions',
                         form=form,
-                        transactions=transactions,
+                        # transactions=transactions,
                         )
 
 @bp.route('/trans/edit_sched', methods=['GET','POST'])
 @login_required
 def trans_edit_sched():
     trans_choices = [(c.id,c.dotm) for c in current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()]
-    transactions = current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()
-    
+    # transactions = current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()
+
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     form=EditSchedTransactionForm()
@@ -472,9 +480,9 @@ def trans_edit_sched():
     if form.validate_on_submit():
         #identify the schedule item selected
         for trans in transactions:
-            if form.select_trans.data == trans.id:  
+            if form.select_trans.data == trans.id:
                 break
-       
+
         #identify the scheduled transaction template associated with the scheduled transaction id
         trans_template = current_user.transactions.filter_by(id=trans.id_transaction).first()
 
@@ -552,12 +560,10 @@ def trans_edit_sched():
         return redirect(url_for('main.trans_edit_sched'))
 
 
-
-    
     return render_template('transactions/edit_sched.html',
                     title='Edit Scheduled Transactions',
                     form=form,
-                    transactions=transactions,
+                    # transactions=transactions,
                     )
 
 
@@ -567,7 +573,7 @@ def trans_delete():
     # TODO: ended budget categories still have transactions visible. Is this a bug or a feature? The whole point of 
     #   allowing budgets to be ended rather than deleted was to retain the historical data on spending. 
     trans_choices = [(c.id,c.amount) for c in current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()]
-    transactions = current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()
+    # transactions = current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()
 
     form = DeleteTransactionForm()
 
@@ -587,13 +593,13 @@ def trans_delete():
     return render_template('transactions/delete.html',
                     title='Delete Transactions',
                     form=form,
-                    transactions=transactions,
+                    # transactions=transactions,
                     )
 
 @bp.route('/trans/view', methods=['GET','POST'])
 @login_required
 def trans_view():
-    transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
+    # transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
     form = DownloadTransactionForm()
 
     if form.validate_on_submit():
@@ -601,14 +607,14 @@ def trans_view():
 
     return render_template('transactions/view.html',
                             title='View Transactions',
-                            transactions=transactions,
+                            # transactions=transactions,
                             form=form
                             )
 
 @bp.route('/trans/transfer',methods=['GET','POST'])
 @login_required
 def trans_transfer():
-    budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
+    # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
 
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
@@ -640,11 +646,11 @@ def trans_transfer():
                                     ttype = "TI")
             db.session.add(to_transaction)
             db.session.commit()
-            
+
             from_transaction.apply_transaction()
             to_transaction.apply_transaction()
-            
-            flash("${:.2f} was transfered from {} to {}".format(form.trans_amount.data, 
+
+            flash("${:.2f} was transfered from {} to {}".format(form.trans_amount.data,
                                                                 from_category.category_title,
                                                                 to_category.category_title))
 
@@ -653,7 +659,7 @@ def trans_transfer():
     return render_template('transactions/transfer.html',
                         title='Transfer',
                         form=form,
-                        budget_categories=budget_categories
+                        # budget_categories=budget_categories
                         )
 
 ###########################################################################################################################
