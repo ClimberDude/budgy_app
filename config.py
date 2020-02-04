@@ -31,7 +31,7 @@ class Config(object):
     SCHEDULER_EXECUTORS = {'default': {'type': 'threadpool', 'max_workers': 20}}
     SCHEDULER_JOB_DEFAULTS = {
         'coalesce': False,
-        'max_instances': 3
+        'max_instances': 1
     }
     SCHEDULER_API_ENABLED = True
 
