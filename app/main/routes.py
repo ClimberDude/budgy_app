@@ -469,7 +469,7 @@ def trans_edit():
 @login_required
 def trans_edit_sched():
     trans_choices = [(c.id,c.dotm) for c in current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()]
-    # transactions = current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()
+    transactions = current_user.scheduled_transactions.order_by(Scheduled_Transaction.dotm.asc()).all()
 
     budget_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
@@ -563,7 +563,7 @@ def trans_edit_sched():
     return render_template('transactions/edit_sched.html',
                     title='Edit Scheduled Transactions',
                     form=form,
-                    # transactions=transactions,
+                    transactions=transactions,
                     )
 
 
