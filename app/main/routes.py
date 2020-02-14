@@ -1,8 +1,9 @@
 from app import db, table_builder
 from app.main import bp, csv_rw, scheduled_tasks
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
-                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, EditSchedTransactionForm, DeleteTransactionForm, \
-                            TransferForm, FundingForm, DownloadTransactionForm, DownloadBudgetForm
+                            AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, \
+                            EditSchedTransactionForm, DeleteTransactionForm, TransferForm, FundingForm, \
+                            DownloadTransactionForm, DownloadBudgetForm
 
 from app.models import User, Budget_Category, Budget_History, Transaction, Scheduled_Transaction
 

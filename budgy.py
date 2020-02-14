@@ -1,5 +1,6 @@
 from app import create_app, db, scheduler
-from app.models import User, Role
+from app.models import User, Role, Budget_Category, Budget_History, \
+                        Transaction, Scheduled_Transaction
 
 app = create_app()
 
@@ -8,6 +9,10 @@ def make_shell_context():
     return {'db':db,
             'User':User,
             'Role':Role,
+            'Budget_Category':Budget_Category,
+            'Budget_History':Budget_History,
+            'Transaction':Transaction,
+            'Scheduled_Transaction':Scheduled_Transaction,
             'scheduler':scheduler
             }
 
