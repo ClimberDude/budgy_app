@@ -18,26 +18,22 @@ def add_scheduled_trans(transaction):
 def apply_scheduled_trans():
     with app.app_context():
         today = int(date.today().day)
-        users = User.query.all()
-        
-        for user in users:
-
-            st = user.scheduled_transactions.filter_by(dotm=today).filter_by(id_user=user.id).all()
+        st = Scheduled_Transaction.query.filter_by(dotm=today).all()
             
-            for trans in st:
-                #pull up the transaction template to populate the new transaction
-                trans_template = Transaction.query.filter_by(id=trans.id_transaction).first()
+        for trans in st:
+            #pull up the transaction template to populate the new transaction
+            trans_template = Transaction.query.filter_by(id=trans.id_transaction).first()
 
-                #apply template values (where appropriate) to the new transaction
-                transaction = Transaction(id_user = trans_template.id_user,
-                                            id_budget_category = trans_template.id_budget_category,
-                                            date = date.today(),
-                                            amount = trans_template.amount,
-                                            vendor = trans_template.vendor,
-                                            note = 'Repeating transaction - applied automatically',
-                                            ttype = trans_template.ttype[-1])
+            #apply template values (where appropriate) to the new transaction
+            transaction = Transaction(id_user = trans_template.id_user,
+                                        id_budget_category = trans_template.id_budget_category,
+                                        date = date.today(),
+                                        amount = trans_template.amount,
+                                        vendor = trans_template.vendor,
+                                        note = 'Repeating transaction - applied automatically',
+                                        ttype = trans_template.ttype[-1])
 
-                db.session.add(transaction)
-                db.session.commit()
+            db.session.add(transaction)
+            db.session.commit()
 
-                transaction.apply_transaction()
+            transaction.apply_transaction()
