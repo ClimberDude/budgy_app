@@ -84,7 +84,7 @@ def budget_add():
 def budget_edit():
     #Populate the list of radio button choices with the current list of
     #budget categories
-    # radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
     # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
@@ -92,7 +92,7 @@ def budget_edit():
     #Instantiate the form
     form = EditBudgetForm()
     #Pass dynamic radio button data to the form
-    # form.select_budget.choices = radio_choices
+    form.select_budget.choices = radio_choices
 
     #If the form passes the built in validators, move on
     if form.validate_on_submit():
@@ -170,7 +170,7 @@ def budget_edit():
 def budget_delete():
     #Populate the list of radio button choices with the current list of
     #budget categories
-    # radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
+    radio_choices = [(c.id,c.category_title) for c in current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()]
 
     #Pull all the current data for the categories for the current user, to display
     # budget_categories = current_user.budget_categories.filter_by(status='A').order_by(Budget_Category.category_title).all()
@@ -179,7 +179,7 @@ def budget_delete():
     form = DeleteBudgetForm()
 
     #Pass dynamic radio button data to the form
-    # form.select_budget.choices = radio_choices
+    form.select_budget.choices = radio_choices
 
     if form.validate_on_submit():
         #Identify the category to be edited by pulling the data from the radio selection
