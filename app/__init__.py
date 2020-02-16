@@ -1,7 +1,7 @@
 from app.mod_tables.models import TableBuilder
 
 #TODO: figure out how to get apscheduler or flask-apscheduler working!
-# from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 from config import Config
@@ -10,7 +10,6 @@ from flask import Flask, request, current_app
 
 from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
-from flask_apscheduler import APScheduler
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -34,12 +33,11 @@ moment = Moment()
 login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page.'
-scheduler = APScheduler()
+scheduler = BackgroundScheduler(jobstores = Config.JOBSTORES,
+                                executors = Config.EXECUTORS,
+                                job_defaults = Config.JOB_DEFAULTS)
 security = Security()
 table_builder = TableBuilder()
-
-# basedir = os.path.abspath(os.path.dirname(__file__))
-# load_dotenv(os.path.join(basedir, '.env'))
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -54,7 +52,7 @@ def create_app(config_class=Config):
     login.init_app(app)
 
     if not scheduler.running:
-        scheduler.init_app(app)
+        # scheduler.init_app(app)
         scheduler.start()
 
     from app.auth import bp as auth_bp
