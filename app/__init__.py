@@ -1,9 +1,5 @@
 from app.mod_tables.models import TableBuilder
 
-#TODO: figure out how to get apscheduler or flask-apscheduler working!
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-
 from config import Config
 from dotenv import load_dotenv
 from flask import Flask, request, current_app
@@ -33,9 +29,7 @@ moment = Moment()
 login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page.'
-scheduler = BackgroundScheduler(jobstores = Config.JOBSTORES,
-                                executors = Config.EXECUTORS,
-                                job_defaults = Config.JOB_DEFAULTS)
+
 security = Security()
 table_builder = TableBuilder()
 
@@ -50,10 +44,6 @@ def create_app(config_class=Config):
     migrate.init_app(app, db, compare_type=True)
     moment.init_app(app)
     login.init_app(app)
-
-    if not scheduler.running:
-        # scheduler.init_app(app)
-        scheduler.start()
 
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')

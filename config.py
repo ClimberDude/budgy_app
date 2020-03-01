@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
@@ -19,14 +18,6 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    
-    #Scheduler config variables
-    JOBSTORES = {'default': SQLAlchemyJobStore(url='sqlite:///' + os.path.join(basedir, 'scheduled_trans.db'))}
-    EXECUTORS = {'default': {'type': 'threadpool', 'max_workers': 20}}
-    JOB_DEFAULTS = {
-        'coalesce': False,
-        'max_instances': 1
-    }
 
     #SQLAlchemy config variables
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
