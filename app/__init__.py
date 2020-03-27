@@ -1,4 +1,5 @@
 from app.mod_tables.models import TableBuilder
+
 from config import Config
 from dotenv import load_dotenv
 from flask import Flask, request, current_app
@@ -28,6 +29,7 @@ moment = Moment()
 login = LoginManager()
 login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page.'
+
 security = Security()
 table_builder = TableBuilder()
 

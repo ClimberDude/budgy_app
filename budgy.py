@@ -1,4 +1,5 @@
 from app import create_app, db, login
+
 from app.models import User, Role, Budget_Category, Budget_History, \
                         Transaction, Scheduled_Transaction
 from flask import redirect, url_for

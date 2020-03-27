@@ -18,7 +18,7 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    
+
     #SQLAlchemy config variables
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'budgy.db')
