@@ -1,6 +1,8 @@
-from app import create_app, db
+from app import create_app, db, login
+
 from app.models import User, Role, Budget_Category, Budget_History, \
                         Transaction, Scheduled_Transaction
+from flask import redirect, url_for
 
 app = create_app()
 
@@ -14,6 +16,10 @@ def make_shell_context():
             'Transaction':Transaction,
             'Scheduled_Transaction':Scheduled_Transaction,
             }
+
+@app.login_manager.unauthorized_handler
+def unauthorized_callback():
+    return redirect(url_for('auth.login'))
 
 @app.before_first_request
 def before_first_request():
