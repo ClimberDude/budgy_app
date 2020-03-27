@@ -1,4 +1,4 @@
-from app import create_app, db, scheduler
+from app import create_app, db
 from app.models import User, Role, Budget_Category, Budget_History, \
                         Transaction, Scheduled_Transaction
 
@@ -13,7 +13,6 @@ def make_shell_context():
             'Budget_History':Budget_History,
             'Transaction':Transaction,
             'Scheduled_Transaction':Scheduled_Transaction,
-            'scheduler':scheduler
             }
 
 @app.before_first_request
