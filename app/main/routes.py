@@ -2,7 +2,7 @@ from app import db, table_builder
 from app.main import bp, csv_rw, scheduled_tasks
 from app.main.forms import AddBudgetForm, AddBatchBudgetForm, EditBudgetForm, DeleteBudgetForm, \
                             AddTransactionForm, AddBatchTransactionForm, EditTransactionForm, \
-                            EditSchedTransactionForm, DeleteTransactionForm, TransferForm, FundingForm, \
+                            EditSchedTransactionForm, TransferForm, FundingForm, \
                             DownloadTransactionForm, DownloadBudgetForm
 
 from app.models import User, Budget_Category, Budget_History, Transaction, Scheduled_Transaction
@@ -578,51 +578,6 @@ def trans_edit_sched():
                     form=form,
                     transactions=transactions,
                     )
-
-
-@bp.route('/trans/delete', methods=['GET','POST'])
-@login_required
-def trans_delete():
-    # TODO: ended budget categories still have transactions visible. Is this a bug or a feature? The whole point of 
-    #   allowing budgets to be ended rather than deleted was to retain the historical data on spending. 
-    trans_choices = [(c.id,c.amount) for c in current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()]
-    # transactions = current_user.transactions.filter(Transaction.ttype != 'SE' and Transaction.ttype != 'SI').order_by(Transaction.date.desc()).all()
-
-    form = DeleteTransactionForm()
-
-    form.select_trans.choices = trans_choices
-    
-    if form.validate_on_submit():
-
-        transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
-        transaction.unapply_transaction()
-
-        db.session.delete(transaction)
-        db.session.commit()
-
-        flash("The transaction you've selected has been deleted.")
-        return redirect(url_for("main.trans_delete"))
-
-    return render_template('transactions/delete.html',
-                    title='Delete Transactions',
-                    form=form,
-                    # transactions=transactions,
-                    )
-
-@bp.route('/trans/view', methods=['GET','POST'])
-@login_required
-def trans_view():
-    # transactions = current_user.transactions.order_by(Transaction.date.desc()).all()
-    form = DownloadTransactionForm()
-
-    if form.validate_on_submit():
-        return redirect(url_for('main.download_trans'))
-
-    return render_template('transactions/view.html',
-                            title='View Transactions',
-                            # transactions=transactions,
-                            form=form
-                            )
 
 @bp.route('/trans/transfer',methods=['GET','POST'])
 @login_required
