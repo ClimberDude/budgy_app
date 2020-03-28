@@ -6,8 +6,17 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-4 bg-dark text-white">
-            <h4>Change Spending Plot Variables</h3>
-            <br><br>
+            <h4>Visualizations</h4>
+            <br>
+            <ul class="nav nav-pills nav-fill">
+                <li class="nav-item bg-dark text-white">
+                    <a class="nav-link active bg-primary text-white" href="{{ url_for('visuals.income_v_spending') }}">Income vs Spending</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link bg-dark text-white" href="{{ url_for('visuals.spending_by_category') }}">Spending by Category</a>
+                </li>
+            </ul>
+            <br>
             <form class="form form-horizontal" method="post" role="form">
             {{ form.hidden_tag() }}
             {{ wtf.form_errors(form, hiddens="only") }}

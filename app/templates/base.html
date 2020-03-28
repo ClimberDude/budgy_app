@@ -12,39 +12,16 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Budgets
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{{ url_for('main.budget_add') }}">Add New Budgets</a>
-                    <a class="dropdown-item" href="{{ url_for('main.budget_fund') }}">Fund Budgets</a>
-                    <a class="dropdown-item" href="{{ url_for('main.budget_edit') }}">Edit Budgets</a>
-                    <a class="dropdown-item" href="{{ url_for('main.budget_delete') }}">Delete Budgets</a>
-                    <a class="dropdown-item" href="{{ url_for('main.budget_view') }}">View Budgets</a>
-                </div>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.budget_add') }}">Budgets</a>
             </li>            
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Transactions
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{{ url_for('main.trans_add') }}">Add Transactions</a>
-                    <a class="dropdown-item" href="{{ url_for('main.trans_transfer') }}">Balance Transfer</a>
-                    <a class="dropdown-item" href="{{ url_for('main.trans_edit') }}">Edit Transactions</a>
-                    <a class="dropdown-item" href="{{ url_for('main.trans_edit_sched') }}">Edit Scheduled Transactions</a>
-                    <a class="dropdown-item" href="{{ url_for('main.trans_delete') }}">Delete Transactions</a>
-                    <a class="dropdown-item" href="{{ url_for('main.trans_view') }}">View Transactions</a>
-                </div>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.trans_add') }}">Transactions</a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('visuals.income_v_spending') }}">
                 Visualizations
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{{ url_for('visuals.income_v_spending') }}">Income vs. Spending</a>
-                    <a class="dropdown-item" href="{{ url_for('visuals.spending_by_category') }}">Spending by Category</a>
-                </div>
             </li>
         </ul>
 

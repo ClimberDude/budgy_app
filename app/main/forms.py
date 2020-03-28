@@ -87,12 +87,14 @@ class EditTransactionForm(FlaskForm):
     select_trans = RadioField('Select Transaction', choices=[], validators=[DataRequired()], coerce=int)
 
     trans_date = DateField('Date',validators=[Optional()],format='%Y-%m-%d',render_kw={'placeholder':'YYYY-MM-DD'})
-    trans_amount = DecimalField('Amount',validators=[Optional()])
     trans_type = SelectField('Type',validators=[Optional()],choices=[('S','- Select Type -'),('E','Expense'),('I','Income')], coerce=str, default=None)
+    trans_amount = DecimalField('Amount',validators=[Optional()])
     # TODO: figure out form validation with SelectField
     trans_category = SelectField('Budget Category',validators=[Optional()],choices=[(0,'- Select Category -')],default=0,coerce=int)
     trans_vendor = StringField('Vendor',validators=[Optional()])
     trans_note = StringField('Note',validators=[Optional()])
+
+    trans_delete = BooleanField('Delete Transaction?',validators=[Optional()])
 
     submit = SubmitField("Submit Trans. Edits")
 
@@ -110,11 +112,6 @@ class EditSchedTransactionForm(FlaskForm):
     trans_delete = BooleanField('Delete Scheduled Transaction?',validators=[Optional()])
 
     submit = SubmitField("Submit Trans. Edits")
-
-class DeleteTransactionForm(FlaskForm): 
-    select_trans = RadioField('Select Transaction', choices=[], validators=[Optional()], coerce=int)
-
-    submit = SubmitField("Delete Transaction")
 
 class TransferForm(FlaskForm):
     from_category = SelectField('From Category',validators=[DataRequired()],choices=[(0,'- Select Category -')],default=0,coerce=int)

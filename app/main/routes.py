@@ -250,6 +250,7 @@ def budget_fund():
 
     else:
         form = FundingForm(fund_budgets = None)
+        budget_categories = None
 
     if form.validate_on_submit():
         fund_sum = 0
@@ -369,7 +370,12 @@ def trans_add():
             db.session.commit()
 
             transaction.apply_transaction()
-            flash("Your transaction has been applied.")
+
+            category = Budget_Category.query.filter_by(id=form.trans_category.data).first()
+            category_title = category.category_title
+            current_balance = category.current_balance
+
+            flash("Your transaction has been applied. {} now has a balance of ${:.2f}".format(category_title,current_balance))
 
         return redirect(url_for('main.trans_add'))
 
@@ -396,7 +402,13 @@ def trans_edit():
         transaction = current_user.transactions.filter_by(id=form.select_trans.data).first()
         flash_note = []
 
-        # TODO: add delete functionality to the edit page. No need for a separate page.
+        if form.trans_delete.data:
+            #delete both the scheduled transaction item and it's template transaction
+            db.session.delete(transaction)
+            db.session.commit()
+            flash('The selected transaction has been deleted.')
+
+            return redirect(url_for('main.trans_edit'))
 
         if form.trans_date.data:
             if form.trans_date.data == transaction.date:
