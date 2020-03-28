@@ -11,7 +11,7 @@ class IncomeVSpendingVisForm(FlaskForm):
     start_date = DateField('From',id='sdate',validators=[Optional()])
     end_date = DateField('To',id='edate',validators=[Optional()])
     budget = SelectField('Filter Budget Category',id='budget',validators=[Optional()],choices=[(0,'All Budget Categories')],default=0,coerce=int)
-    category = SelectField('Fileter Spending Category',id='spend',validators=[Optional()],choices=[('all','All Spending Categories')],default='all',coerce=str)
+    category = SelectField('Filter Spending Category',id='spend',validators=[Optional()],choices=[('all','All Spending Categories')],default='all',coerce=str)
     update = SubmitField('Update Plot',id='update')
 
 class SpendingByCategoryVisForm(FlaskForm):
