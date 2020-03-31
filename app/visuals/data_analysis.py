@@ -181,9 +181,6 @@ def summary_table(**kwargs):
         start = start - relativedelta(minutes=1)
         end = end - relativedelta(days=+1)
 
-        flash(start)
-        flash(end)
-
         data['month'][str(label_date[i])] = []
         month_trans = transactions.filter(Transaction.date.between(start,end))
         
