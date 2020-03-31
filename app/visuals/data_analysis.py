@@ -136,7 +136,16 @@ def summary_table(**kwargs):
     transactions = db.session.query(Budget_Category,Transaction).filter(Transaction.id_user==current_user.id).filter(Transaction.id_budget_category==Budget_Category.id)
     
     start_date = datetime.strptime("{}:{}".format(start_year,start_month),"%Y:%m")
-    diff_month = span
+    
+    if prior_or_following == 0:
+        start = start_date - relativedelta(months=+span-1)
+        end = start_date + relativedelta(months=+1)
+    else:
+        start = start_date
+        end = start_date + relativedelta(months=+span)
+
+    start = start - relativedelta(minutes=1)
+    end = end - relativedelta(days=+1)
 
     data = {'label':'Monthly Summary',
             'month':{},
@@ -145,20 +154,12 @@ def summary_table(**kwargs):
             }
 
     label_date = [start_date]
-
-    if prior_or_following == 0:
-        start = start_date - relativedelta(months=+span)
-        end = start_date
-    else:
-        start = start_date
-        end = start_date + relativedelta(months=+span)
-
     data['month']["Span Sum"] = []
 
     #Calculates a sum of all months in selected span for a particular budget
     for budget_categ in current_user.budget_categories.filter_by(status="A").all():
 
-        budget_trans = transactions.filter(Transaction.date.between(start-relativedelta(minutes=1),end-relativedelta(days=+1))).filter(Budget_Category.category_title == budget_categ.category_title)
+        budget_trans = transactions.filter(Transaction.date.between(start,end)).filter(Budget_Category.category_title == budget_categ.category_title)
         budget_expense_sum = budget_trans.with_entities(func.sum(Transaction.amount).label("Budget Sum")).filter(Transaction.ttype == "E")
         budget_income_sum = budget_trans.with_entities(func.sum(Transaction.amount).label("Budget Sum")).filter(Transaction.ttype == "I")
 
@@ -167,18 +168,24 @@ def summary_table(**kwargs):
             float(budget_income_sum.scalar() if budget_income_sum.scalar() != None else 0)))
 
 
-    for i in range(diff_month):
+    for i in range(span):
         if prior_or_following == 0:
             label_date.append(label_date[i] + relativedelta(months=-1))
-            start = label_date[i+1]
-            end = label_date[i]
+            start = label_date[i]
+            end = label_date[i] + relativedelta(months=+1)
         else:
             label_date.append(label_date[i] + relativedelta(months=+1))
             start = label_date[i]
             end = label_date[i+1]
 
+        start = start - relativedelta(minutes=1)
+        end = end - relativedelta(days=+1)
+
+        flash(start)
+        flash(end)
+
         data['month'][str(label_date[i])] = []
-        month_trans = transactions.filter(Transaction.date.between(start-relativedelta(minutes=1),end-relativedelta(days=+1)))
+        month_trans = transactions.filter(Transaction.date.between(start,end))
         
         #calculates a sum of all budgets for a particular month
         month_expense_sum = month_trans.with_entities(func.sum(Transaction.amount).label("Month Sum")).filter(Transaction.ttype == "E")
