@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+<br>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4 bg-dark text-white">
+            <h4>Visualizations</h4>
+            <br>
+            <ul class="nav nav-pills nav-fill">
+                <li class="nav-item bg-dark text-white">
+                    <a class="nav-link bg-dark text-white" href="{{ url_for('visuals.income_v_spending') }}">Income vs Spending</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link bg-dark text-white" href="{{ url_for('visuals.spending_by_category') }}">Spending by Category</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active bg-primary text-white" href="{{ url_for('visuals.summary') }}">Summary</a>
+                </li>
+            </ul>
+            <br>
+            <form class="form form-horizontal" method="post" role="form">
+            {{ form.hidden_tag() }}
+            {{ wtf.form_errors(form, hiddens="only") }}
+
+                {% for item in form if item.widget.input_type!='hidden' %}
+                <div class="row">
+                    <div class="col-md-4">{{ item.label }}</div>
+                    <div class="col-md-8">{{ item(style="width: 100%;") }}</div> 
+                </div>
+                <br>
+                {% endfor %}
+            </form>
+            <br>
+        </div>
+
+        <div class="col-md-8">
+            <table id="responsive" class="display" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Category</td>
+                        {% for header in data['header1'][1:] %}
+                        <th colspan="2" style="text-align: center;">{{ header }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for label in data['header2'] %}
+                        <td>{{ label[0] }}</td>
+                        <td>{{ label[1] }}</td>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <thead>
+                    <tr>
+                        <th>Sum</th>
+                        <td></td>
+                        <td></td>
+                        {% for i in range(data['Monthly Sum']|length) %}
+                        <td style="text-align: right;">{{ "$%.2f"|format(data['Monthly Sum'][i][0]) }}</td>
+                        <td style="text-align: right;">{{ "$%.2f"|format(data['Monthly Sum'][i][1]) }}</td>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in data.keys() if (key != 'header1') and (key != 'header2') and (key != 'Monthly Sum') %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        {% for i in range(data[key]|length) %}
+                        <td bgcolor="#ffe8e8" style="text-align: right;">{{ "$%.2f"|format(data[key][i][0]) }}</td>
+                        <td bgcolor="#e3fce5" style="text-align: right;">{{ "$%.2f"|format(data[key][i][1]) }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <body>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>  
+    </body>
+
+    <script>
+        $(document).ready( function () {
+            $('#responsive').DataTable({
+                paging: false,
+                searching: true,
+            });
+        } );
+    </script>
+
+</div>
+{% endblock %}
